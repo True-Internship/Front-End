@@ -1,56 +1,79 @@
 import Axios from 'axios'
-import {useState} from 'react'
+import { useState } from 'react'
 import * as XLSX from 'xlsx'
 function App() {
-  const[name,setName] = useState("");
-  const[newname,setnewName] = useState("");
   const [employeeList, setEmployeeList] = useState([]);
+  var checkButton;
+
+
   const [items, setitems] = useState([]);
+  // const [newname, setnewName] = useState("dol");
+  // const [newage, setnewAge] = useState(5);
+  // const [newcountry, setnewCountry] = useState("th");
+  // const [newposition, setnewPosition] = useState("dev");
+  // const [newwage, setnewWage] = useState(2000);
   //ดึงข้อมูลจากpathมาเก็บไว้ในemployeeList
-  const getEmployee = () =>{
-    Axios.get('http://localhost:3001/employee').then((response)=>{
+  const getEmployee = () => {
+    Axios.get('http://localhost:3001/employee').then((response) => {
       setEmployeeList(response.data);
     })
 
   }
   //functionสำหรับการเอาข้อมูลจากinpitไปเก็บไว้บนpath
-  const addEmployee = ()=>{
-    Axios.post('http://localhost:3001/create',{
-      name: name
-    }).then(() =>{
-      setEmployeeList([
-        ...employeeList,//เก็ยข้อมูลตัวเก่าไม่ให้หาย
-        {
-          name:name
-        }
-      ])
-    })
-  }
-  const updateName = (id) =>{
-    Axios.put('http://localhost:3001/update',{
-      name:newname, id:id
-    }).then((response)=>{
+  // const addEmployee = ()=>{
+  //   Axios.post('http://localhost:3001/create',{
+  //     name: name
+  //   }).then(() =>{
+  //     setEmployeeList([
+  //       ...employeeList,//เก็ยข้อมูลตัวเก่าไม่ให้หาย
+  //       {
+  //         name:name
+  //       }
+  //     ])
+  //   })
+  // }
+  const updateName = (id, newname, newage, newcountry, newposition, newwage) => {
+    Axios.put('http://localhost:3001/update', {
+      id: id,
+      name: newname,
+      age: newage,
+      country: newcountry,
+      position: newposition,
+      wage: newwage
+
+
+    }).then((response) => {
       setEmployeeList(
-        employeeList.map((val) =>{
-          return val.id == id ?{
-            name:newname,
-            id:id
-          }:val;
+        employeeList.map((val) => {
+          return val.id == id ? {
+            id: id,
+            name: newname,
+            age: newage,
+            country: newcountry,
+            position: newposition,
+            wage: newwage
+          } : val;
         })
       )
     })
   }
+  const loopItem = () =>{
+    for (let index = 0; index < items.length; index++) {
+      updateName(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
+      
+    }
+  }
   //functionอ่านข้อมูลจากexcel
-  const readExcel = (file) =>{
-    const promise = new Promise((resolve,reject)=>{
+  const readExcel = (file) => {
+    const promise = new Promise((resolve, reject) => {
 
       const fileReader = new FileReader();
       fileReader.readAsArrayBuffer(file)
 
-      fileReader.onload=(e)=>{
-        const bufferArray=e.target.result;
+      fileReader.onload = (e) => {
+        const bufferArray = e.target.result;
 
-        const wb = XLSX.read(bufferArray,{type:'buffer'});
+        const wb = XLSX.read(bufferArray, { type: 'buffer' });
 
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
@@ -59,72 +82,76 @@ function App() {
         resolve(data);
       };
 
-      fileReader.onerror = ((error) =>{
-      reject(error);
+      fileReader.onerror = ((error) => {
+        reject(error);
+      });
     });
-    });
-    promise.then((d) =>{
+    promise.then((d) => {
       setitems(d);
     })
+  }
+  const checkbuttom = (dID,valID) => {
+    if (dID == valID) {
+      console.log("dID and valID is same")
+    }else{
+      console.log("dID and valID is not same")
+    }
+
   }
 
   return (
     <div className="App container">
-    <h1>infomation</h1>
-    <div className="infomation">
-{/* -----------------------------phase1 CRUD data connect database-----------------------------------------  */}
-    {/* 
-      <form action="">
-          <div className="mb-3">
-            <label htmlFor="name" className="form-lable">Name:</label>
-            <input 
-              type="text" 
-              classname="form-control" 
-              placeholder="Enter name"
-              //รับค่ามาจากinput และsetname
-              onChange={(event) =>{
-                setName(event.target.value)
-              }}
-            />
-          </div>
+      <h1>infomation</h1>
+      <div className="infomation">
+        {/* -----------------------------phase1 CRUD data connect database-----------------------------------------  */}
+      </div>
 
-      </form>
-    </div>
-    
-    <br/>
-    <div>
-    <button className="btn btn-primary" onClick={getEmployee}>show</button>
+      <br />
+      <div>
 
-    {/* ดึงข้อมูลออกมาเพื่อแสดงผล */}
-    {/* {employeeList.map((val,key) =>{
-            return(
+
+
+        {/* ดึงข้อมูลออกมาเพื่อแสดงผล */}
+        <button className="btn btn-primary" onClick={getEmployee}>show</button>
+        <input
+          type="file"
+          onChange={(e) => {
+            const file = e.target.files[0];
+            readExcel(file);
+          }}
+
+        />
+
+        {/* {
+          //ข้อมูลที่ได้ทั้งหมดของexcel
+          items.map((d) => (
               <div>
-                <div>
-                  <h1>{val.id}</h1>
-                  <h1>{val.name}</h1>
-                </div>
-                <div>
-                <input 
-                  type="text" 
-                  classname="form-control" 
-                  placeholder="Update now..."
-                  onChange={(event) =>{
-                    setnewName(event.target.value)
-                  }}
-            />
-            <button className="btn btn-primary" onClick={() => {updateName(val.id)}}>update</button>
-                </div>
-                
+                <button className="btn btn-primary" onClick={() => { updateName(d.id, d.name, (d.age).toString(), d.country, d.position, (d.wage).toString()) }}>update</button>
               </div>
-
               
-            )
-          })}
+          ))
+        } */}
+              {
+                //ข้อมูลที่ได้ทั้งหมดของexcel
+                
+                // items.map((d, index) => ( 
 
-                    <button className="btn btn-primary" onClick={addEmployee}>submit</button>  */}
+                  
+              // <div key={index}>
+              //   <button className="btn btn-primary" onClick={() => { checkButton(d.id, val.id) }}>update</button>
+              // </div>
+                  <div >
+                  <button className="btn btn-primary" onClick={() => { loopItem() }}>update</button>
+                </div>
 
-   {/* -----------------------------phase2 read file excel-----------------------------------------                */}
-          <input
+              // ))
+              }
+
+
+        {/* <button className="btn btn-primary" onClick={addEmployee}>submit</button>  */}
+
+        {/* -----------------------------phase2 read file excel-----------------------------------------                */}
+        {/* <input
               type="file"
               onChange={(e) =>{
               const file = e.target.files[0];
@@ -151,12 +178,57 @@ function App() {
     }
    
   </tbody>
-</table>
+</table> */}
 
 
+      </div>
     </div>
-  </div>
   );
 }
 
 export default App;
+// import { ReactExcel, readFile, generateObjects } from '@ramonak/react-excel';
+// import { useState } from 'react';
+
+// const App = () => {
+//   const [initialData, setInitialData] = useState(undefined);
+//   const [currentSheet, setCurrentSheet] = useState({});
+
+//   const handleUpload = (event) => {
+//     const file = event.target.files[0];
+//     //read excel file
+//     readFile(file)
+//       .then((readedData) => setInitialData(readedData))
+//       .catch((error) => console.error(error));
+//   };
+
+//   const save = () => {
+//     const result = generateObjects(currentSheet);
+//     //save array of objects to backend
+//     fetch("/api/save", {
+//         method: 'POST',
+//         body: JSON.stringify(result)
+//     });
+//     console.log(currentSheet)
+//   };
+
+//   return (
+//     <>
+//       <input
+//         type='file'
+//         accept='.xlsx'
+//         onChange={handleUpload}
+//       />
+//       <ReactExcel
+//         initialData={initialData}
+//         onSheetUpdate={(currentSheet) => setCurrentSheet(currentSheet)}
+//         activeSheetClassName='active-sheet'
+//         reactExcelClassName='react-excel'
+//       />
+//       <button onClick={save}>
+//           Save to API
+//       </button>
+//     </>
+//   );
+// }
+// export default App;
