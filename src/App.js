@@ -4,20 +4,21 @@ import * as XLSX from 'xlsx'
 function App() {
   const [employeeList, setEmployeeList] = useState([]);
   const [items, setitems] = useState([]);
+// รายชื่อพนักงานทั้งหมดที่อยู่ในdatabaseจริง
   const getEmployee = () => {
     Axios.get('http://localhost:3001/employee').then((response) => {
       setEmployeeList(response.data);
     })
 
   }
-
+//เรียกfunctionนี้เพื่อเอาข้อมูลจากExcelเข้าtemp (databaseจำลอง)
   const Employee_temp = () => {
     Axios.get('http://localhost:3001/employee_temp').then((response) => {
       setEmployeeList(response.data);
     })
 
   }
-
+//เรียกfunctionนี้เพื่อเช็คข้อมูลระหว่างtempและdatasetถ้าerrorจะเก็บrowที่errorไว้
   const Employee_temp_check_country = () => {
     Axios.put('http://localhost:3001/employee_temp_check_country').then((response) => {
       setEmployeeList(response.data);
@@ -62,6 +63,7 @@ function App() {
   //     ])
   //   })
   // }
+  //เอาข้อมูลจากExcelเข้าdatabaseจริง
   const updateEmployee = (id, newname, newage, newcountry, newposition, newwage) => {
     Axios.put('http://localhost:3001/update', {
       id: id,
@@ -87,6 +89,7 @@ function App() {
       )
     })
   }
+//เอาข้อมูลจากExcelเข้าdatabase จำลอง
   const updateEmployee_temp = (id, newname, newage, newcountry, newposition, newwage) => {
     Axios.put('http://localhost:3001/update_temp', {
       id: id,
@@ -112,6 +115,7 @@ function App() {
       )
     })
   }
+  
   const loopItem = () => {
     for (let index = 0; index < items.length; index++) {
       updateEmployee_temp(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
