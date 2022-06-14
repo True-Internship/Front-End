@@ -1,8 +1,9 @@
 import Axios from 'axios'
-import { useState } from 'react'
+import { useEffect, useState,React } from 'react'
 import * as XLSX from 'xlsx'
 function App() {
   const [employeeList, setEmployeeList] = useState([]);
+  const [employeeList_temp, setEmployeeList_temp] = useState([]);
   const [items, setitems] = useState([]);
 // รายชื่อพนักงานทั้งหมดที่อยู่ในdatabaseจริง
   const getEmployee = () => {
@@ -14,17 +15,27 @@ function App() {
 //เรียกfunctionนี้เพื่อเอาข้อมูลจากExcelเข้าtemp (databaseจำลอง)
   const Employee_temp = () => {
     Axios.get('http://localhost:3001/employee_temp').then((response) => {
-      setEmployeeList(response.data);
+      setEmployeeList_temp(response.data);
     })
 
   }
-//เรียกfunctionนี้เพื่อเช็คข้อมูลระหว่างtempและdatasetถ้าerrorจะเก็บrowที่errorไว้
-  const Employee_temp_check_country = () => {
-    Axios.put('http://localhost:3001/employee_temp_check_country').then((response) => {
-      setEmployeeList(response.data);
-    })
+//     useEffect(()=>{
+ 
+// //เรียกfunctionนี้เพื่อเช็คข้อมูลระหว่างtempและdatasetถ้าerrorจะเก็บrowที่errorไว้
+//   const Employee_temp_check_country = () => {
+//     Axios.put('http://localhost:3001/employee_temp_check_country').then((response) => {
+//       setEmployeeList_temp(response.data);
+//     })
 
-  }
+//   };
+//   Employee_temp_check_country();
+//  },[]) 
+
+useEffect(() => {
+  Axios.get('http://localhost:3001/employee_temp_check_country').then((response) => {
+    setEmployeeList_temp(response.data);
+  });
+}, []);
   // const Employee_temp_check_country = (id, newname, newage, newcountry, newposition, newwage) => {
   //   Axios.get('http://localhost:3001/employee_temp_check_country', {
   //     id: id,
@@ -115,12 +126,23 @@ function App() {
       )
     })
   }
-  
-  const loopItem = () => {
+
+  const loopItem_employee_temp = () => {
     for (let index = 0; index < items.length; index++) {
       updateEmployee_temp(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
-
     }
+    Axios.get('http://localhost:3001/employee_temp_check_country').then((response) => {
+    setEmployeeList_temp(response.data);
+  });
+    if (employeeList_temp.length === 0) {
+      for (let index = 0; index < items.length; index++) {
+        updateEmployee(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
+      }
+    } else {
+      console.log(employeeList_temp)
+      console.log(employeeList_temp.length)
+    }
+    // console.log(employeeList_temp.length === 0)
   }
   //functionอ่านข้อมูลจากexcel
   const readExcel = (file) => {
@@ -176,7 +198,7 @@ function App() {
         />
 
         <div >
-          <button className="btn btn-primary" onClick={() => { loopItem() }}>update</button>
+          <button className="btn btn-primary" onClick={() => { loopItem_employee_temp() }}>update</button>
         </div>
 
 
