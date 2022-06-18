@@ -2,7 +2,7 @@ import { keys } from '@material-ui/core/styles/createBreakpoints';
 import Axios from 'axios'
 import { useEffect, useState, React } from 'react'
 import * as XLSX from 'xlsx'
-function SelectFile() {
+const SelectFile = ({logout}) => {
   const [employeeList, setEmployeeList] = useState([]);
   const [employeeList_temp, setEmployeeList_temp] = useState([]);
   const [items, setitems] = useState([]);
@@ -214,6 +214,9 @@ function SelectFile() {
         <div >
           <button className="btn btn-primary" onClick={() => { loopItem_employee_temp() }}>update</button>
           
+        </div>
+        <div>
+          <button onClick={logout}>Logout</button>
         </div>
 
       </div>

@@ -2,16 +2,16 @@ import React, { useState } from "react";
 import Axios from "axios";
 import SelectFile from "./SelectFile";
 import { Navigate } from "react-router-dom";
-import { useNavigate,withRouter } from 'react-router'
-import auth from "./Auth";
+import { useNavigate } from 'react-router'
 
-export const Login = props => {
-    const history = useNavigate();
+
+
+const Login = ({authenticate}) => {
     const [username, setUserneme] = useState("")
     const [password, setPassword] = useState("")
     const [loginState, setLoginState] = useState("")
     const [check, setcheck] = useState("")
-    const router = useNavigate();
+    const navigate = useNavigate();
 
 
     const login = () =>{
@@ -22,13 +22,13 @@ export const Login = props => {
             if (response.data.message){
                 setLoginState(response.data.message)
                 setcheck("false")
-                router("/")
+                navigate("/")
             }else{
                 setcheck(true)
                 setLoginState(response.data[0].UserName)
                 setcheck("true")
-                router('/selectfile');
-                // router("")
+                authenticate()
+                navigate("/selectfile")
 
             }
             
