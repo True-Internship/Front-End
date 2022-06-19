@@ -31,7 +31,7 @@ function App() {
             element={<SelectFile logout={() => setUser(false)} />} />
         </>
       )}
-      <Route path="/selectfile" element={<Navigate to={user ? "/selectfile" : "/"}/>}/>
+      <Route path="*" element={<Navigate to={user ? "/selectfile" : "/"}/>}/>
 
     </Routes>
 
