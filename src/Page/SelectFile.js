@@ -6,8 +6,8 @@ const SelectFile = ({ logout }) => {
   const [employeeList, setEmployeeList] = useState([]);
   const [employeeList_temp, setEmployeeList_temp] = useState([]);
   const [items, setitems] = useState([]);
-  const [count, setcount] = useState(0);
   const [employeeList_error, setEmployeeList_error] = useState([]);
+  const [stateUpdate, setStateUpdate] = useState("");
   // รายชื่อพนักงานทั้งหมดที่อยู่ในdatabaseจริง
   useEffect(() => {
     Axios.get('http://localhost:3001/employee').then((response) => {
@@ -29,64 +29,6 @@ const SelectFile = ({ logout }) => {
       .catch(err => console.log(err))
   }, [])
 
-  // const deleteErrorTemp = () =>{
-  //   Axios.delete
-  // }
-
-
-
-
-  //     useEffect(()=>{
-
-  // //เรียกfunctionนี้เพื่อเช็คข้อมูลระหว่างtempและdatasetถ้าerrorจะเก็บrowที่errorไว้
-  //     Axios.put('http://localhost:3001/employee_temp_check_country').then((response) => {
-  //       setEmployeeList_error(response.data);
-  //     })
-  //  },[]) 
-
-  // useEffect(() => {
-  //   Axios.get('http://localhost:3001/employee_temp_check_country').then((response) => {
-  //     setEmployeeList_error(response.data);
-  //   });
-  // }, []);
-  // const Employee_temp_check_country = (id, newname, newage, newcountry, newposition, newwage) => {
-  //   Axios.get('http://localhost:3001/employee_temp_check_country', {
-  //     id: id,
-  //     name: newname,
-  //     age: newage,
-  //     country: newcountry,
-  //     position: newposition,
-  //     wage: newwage
-
-
-  //   }).then((response) => {
-  //     setEmployeeList(
-  //       employeeList.map((val) => {
-  //         return val.id == id ? {
-  //           id: id,
-  //           name: newname,
-  //           age: newage,
-  //           country: newcountry,
-  //           position: newposition,
-  //           wage: newwage
-  //         } : val;
-  //       })
-  //     )
-  //   })
-  // }
-  //functionสำหรับการเอาข้อมูลจากinpitไปเก็บไว้บนpath
-  // const addEmployee = ()=>{
-  //   Axios.post('http://localhost:3001/create',{
-  //     name: name
-  //   }).then(() =>{
-  //     setEmployeeList([
-  //       ...employeeList,//เก็ยข้อมูลตัวเก่าไม่ให้หาย
-  //       {
-  //         name:name
-  //       }
-  //     ])
-  //   })
-  // }
   //เอาข้อมูลจากExcelเข้าdatabaseจริง
   const updateEmployee = (id, newname, newage, newcountry, newposition, newwage) => {
     Axios.put('http://localhost:3001/update', {
@@ -127,9 +69,6 @@ const SelectFile = ({ logout }) => {
       wage: newwage
     })
   }
-  const getvalue = () => {
-    console.log(employeeList_temp, "aaa")
-  }
 
   const loopItem_employee_temp = () => {
     console.log("loop excel into temp")
@@ -137,13 +76,12 @@ const SelectFile = ({ logout }) => {
       updateEmployee_temp(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
 
     }
-    window.location.reload(false);
-    // if (employeeList_error.length === 0 && count == 1) {
-    //   console.log("update enployee")
-    //   for (let index = 0; index < items.length; index++) {
-    //     updateEmployee(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
-    //   }
-    // }
+  window.location.reload(false);    
+    if (Object.keys(employeeList_error).length == 0) {
+      for (let index = 0; index < items.length; index++) {
+        updateEmployee(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
+      }
+    }
 
     // console.log(employeeList_temp.length === 0)
   }
@@ -191,7 +129,10 @@ const SelectFile = ({ logout }) => {
         />
       </div>
       <div >
-        <button className="btn btn-primary" onClick={() => { loopItem_employee_temp() }}>update</button>
+        <button className="btn btn-primary" 
+        onClick={() => {loopItem_employee_temp()}}
+        
+        >update</button>
 
       </div>
       <div>
@@ -199,16 +140,28 @@ const SelectFile = ({ logout }) => {
       </div>
       <div>
         <h3>record error</h3>
-        <ul>
-          {employeeList_error.map((val) =>
-            <li key={val.id}>
-              ID :{val.id}<br />
-              name :{val.name}<br />
-              age :{val.age}
-            </li>
-          )}
-        </ul>
+          <div>
+              {employeeList_error.map((val,index) => {
+                if (val.country == null){
+                  return <h1 key={index}>{val.id}</h1>
+                }
+              }       
+                // <li key={val.id}>
+                //   ID :{val.id}<br />
+                //   name :{val.name}<br />
+                //   age :{val.age}
+                // </li>
+              )}
+              <h1>{stateUpdate}</h1>
+              <h1>count error = {Object.keys(employeeList_error).length}</h1>
+
+          </div>
+
+
       </div>
+      {/* <div>
+        <button onClick={delete_api}>click</button>
+      </div> */}
 
     </div>
   );
