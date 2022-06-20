@@ -2,44 +2,36 @@ import { keys } from '@material-ui/core/styles/createBreakpoints';
 import Axios from 'axios'
 import { useEffect, useState, React } from 'react'
 import * as XLSX from 'xlsx'
-const SelectFile = ({logout}) => {
+const SelectFile = ({ logout }) => {
   const [employeeList, setEmployeeList] = useState([]);
   const [employeeList_temp, setEmployeeList_temp] = useState([]);
   const [items, setitems] = useState([]);
   const [count, setcount] = useState(0);
-  const [employeeList_error, setEmployeeList_error] = useState("");
-  const [employeeList_error_length, setEmployeeList_error_length] = useState("");
+  const [employeeList_error, setEmployeeList_error] = useState([]);
   // รายชื่อพนักงานทั้งหมดที่อยู่ในdatabaseจริง
-  // const getEmployee = () => {
-  //   Axios.get('http://localhost:3001/employee').then((response) => {
-  //     setEmployeeList(response.data);
-  //   })
+  useEffect(() => {
+    Axios.get('http://localhost:3001/employee').then((response) => {
+      setEmployeeList(response.data);
+    })
+  }, [])
 
-  // }
 
-  //เรียกfunctionนี้เพื่อเอาข้อมูลจากExcelเข้าtemp (databaseจำลอง)
-  // const Employee_temp = () => {
-  //   Axios.get('http://localhost:3001/employee_temp').then((response) => {
-  //     setEmployeeList_temp(response.data);
-  //   })
-
-  // }
-
+  // เรียกfunctionนี้เพื่อเอาข้อมูลจากExcelเข้าtemp (databaseจำลอง)
+  useEffect(() => {
+    Axios.get('http://localhost:3001/employee_temp').then((response) => {
+      setEmployeeList_temp(response.data);
+    })
+  }, [])
 
   useEffect(() => {
-    Employee_temp_error()
+    Axios.get('http://localhost:3001/employee_temp_check_country')
+      .then(response => setEmployeeList_error(response.data))
+      .catch(err => console.log(err))
   }, [])
-  const Employee_temp_error = async () => {
-    await Axios.get('http://localhost:3001/employee_temp_check_country').then((response) => {
-      console.log("respons data = ", response.data)
-      const responDT = response.data
-      const responDT_length = response.data.length
-      setEmployeeList_error(responDT)
-      setEmployeeList_error_length(responDT_length)
 
-
-    })
-  }
+  // const deleteErrorTemp = () =>{
+  //   Axios.delete
+  // }
 
 
 
@@ -125,6 +117,7 @@ const SelectFile = ({logout}) => {
 
   //เอาข้อมูลจากExcelเข้าdatabase จำลอง
   const updateEmployee_temp = (id, newname, newage, newcountry, newposition, newwage) => {
+    console.log("bbbb")
     Axios.put('http://localhost:3001/update_temp', {
       id: id,
       name: newname,
@@ -132,30 +125,19 @@ const SelectFile = ({logout}) => {
       country: newcountry,
       position: newposition,
       wage: newwage
-
-
-    }).then((response) => {
-      setEmployeeList(
-        employeeList.map((val) => {
-          return val.id == id ? {
-            id: id,
-            name: newname,
-            age: newage,
-            country: newcountry,
-            position: newposition,
-            wage: newwage
-          } : val;
-        })
-      )
     })
+  }
+  const getvalue = () => {
+    console.log(employeeList_temp, "aaa")
   }
 
   const loopItem_employee_temp = () => {
+    console.log("loop excel into temp")
     for (let index = 0; index < items.length; index++) {
       updateEmployee_temp(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
 
     }
-    Employee_temp_error()
+    window.location.reload(false);
     // if (employeeList_error.length === 0 && count == 1) {
     //   console.log("update enployee")
     //   for (let index = 0; index < items.length; index++) {
@@ -163,7 +145,6 @@ const SelectFile = ({logout}) => {
     //   }
     // }
 
-    setcount(1)
     // console.log(employeeList_temp.length === 0)
   }
   //functionอ่านข้อมูลจากexcel
@@ -197,10 +178,6 @@ const SelectFile = ({logout}) => {
 
   return (
     <div className="App container">
-      <h1>infomation</h1>
-      <div className="infomation">
-      </div>
-      <br />
       <div>
         {/* ดึงข้อมูลออกมาเพื่อแสดงผล */}
         <input
@@ -211,15 +188,27 @@ const SelectFile = ({logout}) => {
           }}
 
         />
-        <div >
-          <button className="btn btn-primary" onClick={() => { loopItem_employee_temp() }}>update</button>
-          
-        </div>
-        <div>
-          <button onClick={logout}>Logout</button>
-        </div>
+      </div>
+      <div >
+        <button className="btn btn-primary" onClick={() => { loopItem_employee_temp() }}>update</button>
 
       </div>
+      <div>
+        <button onClick={logout}>Logout</button>
+      </div>
+      <div>
+        <h3>record error</h3>
+        <ul>
+          {employeeList_error.map((val) =>
+            <li key={val.id}>
+              ID :{val.id}<br />
+              name :{val.name}<br />
+              age :{val.age}
+            </li>
+          )}
+        </ul>
+      </div>
+
     </div>
   );
 }
