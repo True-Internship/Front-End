@@ -11,6 +11,7 @@ const SelectFile = ({ logout }) => {
   const [employeeList_error, setEmployeeList_error] = useState([]);
   const [employeeList_error_length, setEmployeeList_error_length] = useState(null);
   const [file, setFile] = useState(null);
+  const [count, setCount] = useState(0);
   // รายชื่อพนักงานทั้งหมดที่อยู่ในdatabaseจริง
   useEffect(() => {
     Axios.get('http://localhost:3001/employee').then((response) => {
@@ -52,15 +53,25 @@ const SelectFile = ({ logout }) => {
   }, [employeeList_error])
 
   const check_length_error = () => {
+    var count1 = 0
+    setCount(count+1)
+    console.log(count1,"count1")
 
-    console.log(Object.keys(employeeList_error).length,"check error real DB")//0 length
-    // Object.keys(employeeList_error).length === 0
-    if (Object.keys(employeeList_error).length == 5) {
+    console.log(employeeList_error.length,"check error real DB")//0 length
+    count1 += employeeList_error.length
+    console.log(count,"count usestate")
+    if ( count1 === 0 && count === 1) {
       console.log("update employee success!!")
+      console.log(count1,"count1")
       for (let index = 0; index < items.length; index++) {
         updateEmployee(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
       }
+      
+    }else{
+      console.log("not update")
+      
     }
+    
   }
 
   //เอาข้อมูลจากExcelเข้าdatabaseจริง
@@ -145,6 +156,7 @@ const SelectFile = ({ logout }) => {
     setitems(valueexcel)
     delEmployee()
     check_length_error()
+    setCount(0)
   }
 
 
