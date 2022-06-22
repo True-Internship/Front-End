@@ -10,7 +10,6 @@ const SelectFile = ({ logout }) => {
   const [items, setitems] = useState([]);
   const [employeeList_error, setEmployeeList_error] = useState([]);
   const [employeeList_error_length, setEmployeeList_error_length] = useState(null);
-  const [stateUpdate, setStateUpdate] = useState("");
   const [file, setFile] = useState(null);
   // รายชื่อพนักงานทั้งหมดที่อยู่ในdatabaseจริง
   useEffect(() => {
@@ -29,7 +28,7 @@ const SelectFile = ({ logout }) => {
     checktemp()
   }, [])
   useEffect(() => {
-    console.log(items)
+    console.log(items,"useeffect items in delete")
     delEmployee()
   }, [items])
 
@@ -43,19 +42,20 @@ const SelectFile = ({ logout }) => {
 
   const delEmployee = async () => {
     await Axios.delete('http://localhost:3001/delete')
-    setEmployeeList_error([]);
-    setEmployeeList_error_length(null)
-    console.log('aaaaaaa')
+    // setEmployeeList_error([]);
+    // setEmployeeList_error_length(null)
+    console.log('function delete employee')
     loopItem_employee_temp()
     // readExcel(file)
   }
   useEffect(() => {
     check_length_error()
   }, [employeeList_error])
-  const check_length_error = async () => {
-    if (employeeList_error_length === 0) {
+  const check_length_error = () => {
+    console.log(Object.keys(employeeList_error).length,"check error real DB")
+    if (Object.keys(employeeList_error).length === 0) {
       for (let index = 0; index < items.length; index++) {
-        await updateEmployee(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
+        updateEmployee(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
       }
     }
   }
@@ -86,18 +86,18 @@ const SelectFile = ({ logout }) => {
 
   const loopItem_employee_temp = async () => {
     console.log("bbbbbb")
-    console.log(items)
+    console.log(items,"write data in DB")
     for (let index = 0; index < items.length; index++) {
       updateEmployee_temp(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
 
-    } 
-    check_length_error()
+    }  
     checktemp()
+    // check_length_error()
+    
     // window.location.reload(false)
     // window.location.reload(false);
 
   }
-  //functionอ่านข้อมูลจากexcel 
   /**
    * 
    * @param {file} file 
@@ -140,6 +140,8 @@ const SelectFile = ({ logout }) => {
     event.preventDefault();
     const valueexcel = await readExcel(file)
     setitems(valueexcel)
+    delEmployee()
+    check_length_error()
   }
 
 
