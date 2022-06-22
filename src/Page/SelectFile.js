@@ -28,7 +28,6 @@ const SelectFile = ({ logout }) => {
     checktemp()
   }, [])
   useEffect(() => {
-    console.log(items,"useeffect items in delete")
     delEmployee()
   }, [items])
 
@@ -44,16 +43,20 @@ const SelectFile = ({ logout }) => {
     await Axios.delete('http://localhost:3001/delete')
     // setEmployeeList_error([]);
     // setEmployeeList_error_length(null)
-    console.log('function delete employee')
+
     loopItem_employee_temp()
     // readExcel(file)
   }
   useEffect(() => {
     check_length_error()
   }, [employeeList_error])
+
   const check_length_error = () => {
-    console.log(Object.keys(employeeList_error).length,"check error real DB")
-    if (Object.keys(employeeList_error).length === 0) {
+
+    console.log(Object.keys(employeeList_error).length,"check error real DB")//0 length
+    // Object.keys(employeeList_error).length === 0
+    if (Object.keys(employeeList_error).length == 5) {
+      console.log("update employee success!!")
       for (let index = 0; index < items.length; index++) {
         updateEmployee(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
       }
