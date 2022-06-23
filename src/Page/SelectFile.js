@@ -24,13 +24,16 @@ const SelectFile = ({ logout }) => {
       setEmployeeList_temp(response.data);
     })
   }, [])
-
   useEffect(() => {
     checktemp()
   }, [])
   useEffect(() => {
     delEmployee()
   }, [items])
+  useEffect(() => {
+    check_length_error()
+  }, [employeeList_error])
+
 
   const checktemp = () => {
     Axios.get('http://localhost:3001/employee_temp_check_country').then((response) => {
@@ -38,40 +41,31 @@ const SelectFile = ({ logout }) => {
       setEmployeeList_error_length(response.data.length)
     })
   }
-
-
   const delEmployee = async () => {
     await Axios.delete('http://localhost:3001/delete')
     // setEmployeeList_error([]);
     // setEmployeeList_error_length(null)
-
     loopItem_employee_temp()
     // readExcel(file)
   }
-  useEffect(() => {
-    check_length_error()
-  }, [employeeList_error])
+
 
   const check_length_error = () => {
     var count1 = 0
-    setCount(count+1)
-    console.log(count1,"count1")
-
-    console.log(employeeList_error.length,"check error real DB")//0 length
+    setCount(count + 1)
+    console.log(count1, "count1")
+    console.log(employeeList_error.length, "check error real DB")//0 length
     count1 += employeeList_error.length
-    console.log(count,"count usestate")
-    if ( count1 === 0 && count === 1) {
+    console.log(count, "count usestate")
+    if (count1 === 0 && count === 1) {
       console.log("update employee success!!")
-      console.log(count1,"count1")
+      console.log(count1, "count1")
       for (let index = 0; index < items.length; index++) {
         updateEmployee(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
       }
-      
-    }else{
+    } else {
       console.log("not update")
-      
     }
-    
   }
 
   //เอาข้อมูลจากExcelเข้าdatabaseจริง
@@ -100,14 +94,14 @@ const SelectFile = ({ logout }) => {
 
   const loopItem_employee_temp = async () => {
     console.log("bbbbbb")
-    console.log(items,"write data in DB")
+    console.log(items, "write data in DB")
     for (let index = 0; index < items.length; index++) {
       updateEmployee_temp(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
 
-    }  
+    }
     checktemp()
     // check_length_error()
-    
+
     // window.location.reload(false)
     // window.location.reload(false);
 
@@ -143,6 +137,21 @@ const SelectFile = ({ logout }) => {
     //   setitems(d);
     //   console.log(items)
     // })
+  }
+  const get_error = () =>{
+    var tifOptions = Object.keys(employeeList_error).forEach(function (count) { //key == 0,1
+      var list_null = []
+      Object.keys(employeeList_error[count]).forEach(function (key) { //key == 0,1
+          if (employeeList_error[count][key] == null) {
+              list_null.push(key)
+          }
+      })
+  
+      if (list_null.length != 0) {
+          console.log(employeeList_error[count])
+          console.log(list_null)
+      }
+  });
   }
 
   // const ref = useRef();
@@ -187,12 +196,6 @@ const SelectFile = ({ logout }) => {
       <div>
         <button onClick={logout}>Logout</button>
       </div>
-      <div>
-        <h3>record error</h3>
-
-
-
-      </div>
       {/* <div>
         <button onClick={delete_api}>click</button>
       </div> */}
@@ -209,24 +212,25 @@ const SelectFile = ({ logout }) => {
           update
         </Button>
       </Form>
+
       <div>
-        {employeeList_error.map((val, index) => {
-          // if (val.country == null) {
-          //   return <h1 key={index}>{val.id}</h1>
-          // }
+        <h1>record error</h1>
+        {/* {employeeList_error.map((val, index) => {
+
           return (
+
             <li key={index}>
               ID :{val.id}<br />
               name :{val.name}<br />
               age :{val.age}
             </li>
           )
-
         }
+        )} */}
 
-        )}
         <h1>count error = {employeeList_error_length}</h1>
         <h1>count item = {items.length}</h1>
+        <button onClick={get_error}>click here</button>
         {/* <button onClick={reset}>reset</button> */}
       </div>
     </div>
