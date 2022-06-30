@@ -36,7 +36,7 @@ const SelectFile = ({ logout }) => {
   }, [employeeList_error])
 
 
-  const checktemp = async() => {
+  const checktemp = async () => {
     await Axios.get('http://localhost:3001/employee_temp_check_country').then((response) => {
       setEmployeeList_error(response.data);
       setEmployeeList_error_length(response.data.length)
@@ -70,9 +70,9 @@ const SelectFile = ({ logout }) => {
   }
 
   //เอาข้อมูลจากExcelเข้าdatabaseจริง
-  useEffect(()=>{
+  useEffect(() => {
     updateEmployee()
-  },[])
+  }, [])
   const updateEmployee = async (id, newname, newage, newcountry, newposition, newwage) => {
     await Axios.put('http://localhost:3001/update', {
       id: id,
@@ -85,9 +85,9 @@ const SelectFile = ({ logout }) => {
   }
 
   //เอาข้อมูลจากExcelเข้าdatabase จำลอง
-  useEffect(()=>{
+  useEffect(() => {
     updateEmployee_temp()
-  },[])
+  }, [])
   const updateEmployee_temp = async (id, newname, newage, newcountry, newposition, newwage) => {
     await Axios.post('http://localhost:3001/update_temp', {
       id: id,
@@ -107,6 +107,7 @@ const SelectFile = ({ logout }) => {
 
     }
     checktemp()
+
   }
   /**
    * 
@@ -191,7 +192,6 @@ const SelectFile = ({ logout }) => {
       <div>
         <h1>record error</h1>
 
-
         {show ?
           <div>
             <div>can't update table employee</div>
@@ -210,6 +210,9 @@ const SelectFile = ({ logout }) => {
               )
             })}
           </div> : <h1></h1>}
+
+
+
 
         <h1>count error = {employeeList_error_length}</h1>
         <h1>count item = {items.length}</h1>
