@@ -1,6 +1,6 @@
 
 import Axios from 'axios'
-import { useEffect, useState, React} from 'react'
+import { useEffect, useState, React } from 'react'
 import * as XLSX from 'xlsx'
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
@@ -13,7 +13,7 @@ const SelectFile = ({ logout }) => {
   const [file, setFile] = useState(null);
   const [count, setCount] = useState(0);
   // รายชื่อพนักงานทั้งหมดที่อยู่ในdatabaseจริง
-  const [data2, setData2] = useState([])
+  const [listErrorFull, setListErrorFull] = useState([])
   const [show, setShow] = useState(false)
   useEffect(() => {
     Axios.get('http://localhost:3001/employee').then((response) => {
@@ -37,8 +37,8 @@ const SelectFile = ({ logout }) => {
   }, [employeeList_error])
 
 
-  const checktemp = () => {
-    Axios.get('http://localhost:3001/employee_temp_check_country').then((response) => {
+  const checktemp = async() => {
+    await Axios.get('http://localhost:3001/employee_temp_check_country').then((response) => {
       setEmployeeList_error(response.data);
       setEmployeeList_error_length(response.data.length)
     })
@@ -146,9 +146,9 @@ const SelectFile = ({ logout }) => {
     errList();
     setShow(!show)
     if (show === true) {
-      setData2([])
+      setListErrorFull([])
     }
-    console.log(data2)
+    console.log(listErrorFull)
   }
 
   const errList = () => {
@@ -163,7 +163,7 @@ const SelectFile = ({ logout }) => {
       if (list_null.length != 0) {
         // console.log(employeeList_error[count],"asas")
         // console.log(list_null)
-        data2.push([employeeList_error[count], list_null])
+        listErrorFull.push([employeeList_error[count], list_null])
 
       }
     });
@@ -214,25 +214,6 @@ const SelectFile = ({ logout }) => {
       {/* <div>
         <button onClick={delete_api}>click</button>
       </div> */}
-      {show ?
-        <div>
-          {data2.map((data, i) => {
-            return (
-              <div key={i}>
-                {data.map((value,j) => {
-                  return (
-                    <div key={j}>
-                      {JSON.stringify(value)}
-                    </div>
-                  )
-
-                })}
-                <br/>
-              </div>
-            )
-
-          })}
-        </div> : <h1>here</h1>}
       <Form onSubmit={handleSubmit}>
         <Form.Group size="lg" controlId="email">
           <Form.Label>Excel upload</Form.Label>
@@ -249,18 +230,26 @@ const SelectFile = ({ logout }) => {
 
       <div>
         <h1>record error</h1>
-        {/* {employeeList_error.map((val, index) => {
+        {show ?
+          <div>
+            <div>can't update table employee</div>
+            {listErrorFull.map((data, i) => {
+              return (
+                <div key={i}>
+                  {data.map((value, j) => {
+                    return (
+                      <div key={j}>
+                        {JSON.stringify(value)}
+                      </div>
+                    )
 
-          return (
+                  })}
+                  <br />
+                </div>
+              )
 
-            <li key={index}>
-              ID :{val.id}<br />
-              name :{val.name}<br />
-              age :{val.age}
-            </li>
-          )
-        }
-        )} */}
+            })}
+          </div> : <h1></h1>}
 
         <h1>count error = {employeeList_error_length}</h1>
         <h1>count item = {items.length}</h1>
