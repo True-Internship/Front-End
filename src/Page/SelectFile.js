@@ -1,6 +1,6 @@
 
 import Axios from 'axios'
-import { useEffect, useState, React, useCallback, useRef } from 'react'
+import { useEffect, useState, React} from 'react'
 import * as XLSX from 'xlsx'
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
@@ -13,6 +13,8 @@ const SelectFile = ({ logout }) => {
   const [file, setFile] = useState(null);
   const [count, setCount] = useState(0);
   // รายชื่อพนักงานทั้งหมดที่อยู่ในdatabaseจริง
+  const [data2, setData2] = useState([])
+  const [show, setShow] = useState(false)
   useEffect(() => {
     Axios.get('http://localhost:3001/employee').then((response) => {
       setEmployeeList(response.data);
@@ -138,20 +140,33 @@ const SelectFile = ({ logout }) => {
     //   console.log(items)
     // })
   }
-  const get_error = () =>{
-    var tifOptions = Object.keys(employeeList_error).forEach(function (count) { //key == 0,1
+  const get_error = async (e) => {
+    // e.preventDefault();
+
+    errList();
+    setShow(!show)
+    if (show === true) {
+      setData2([])
+    }
+    console.log(data2)
+  }
+
+  const errList = () => {
+    Object.keys(employeeList_error).forEach(function (count) { //key == 0,1
       var list_null = []
       Object.keys(employeeList_error[count]).forEach(function (key) { //key == 0,1
-          if (employeeList_error[count][key] == null) {
-              list_null.push(key)
-          }
+        if (employeeList_error[count][key] == null) {
+          list_null.push(key)
+        }
       })
-  
+
       if (list_null.length != 0) {
-          console.log(employeeList_error[count])
-          console.log(list_null)
+        // console.log(employeeList_error[count],"asas")
+        // console.log(list_null)
+        data2.push([employeeList_error[count], list_null])
+
       }
-  });
+    });
   }
 
   // const ref = useRef();
@@ -199,6 +214,25 @@ const SelectFile = ({ logout }) => {
       {/* <div>
         <button onClick={delete_api}>click</button>
       </div> */}
+      {show ?
+        <div>
+          {data2.map((data, i) => {
+            return (
+              <div key={i}>
+                {data.map((value,j) => {
+                  return (
+                    <div key={j}>
+                      {JSON.stringify(value)}
+                    </div>
+                  )
+
+                })}
+                <br/>
+              </div>
+            )
+
+          })}
+        </div> : <h1>here</h1>}
       <Form onSubmit={handleSubmit}>
         <Form.Group size="lg" controlId="email">
           <Form.Label>Excel upload</Form.Label>
@@ -230,7 +264,7 @@ const SelectFile = ({ logout }) => {
 
         <h1>count error = {employeeList_error_length}</h1>
         <h1>count item = {items.length}</h1>
-        <button onClick={get_error}>click here</button>
+        <button onClick={(e) => get_error(e)}>click here</button>
         {/* <button onClick={reset}>reset</button> */}
       </div>
     </div>
