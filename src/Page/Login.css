@@ -1,0 +1,38 @@
+
+.topic-lable {
+    color: blue;
+    padding-right: 100%;
+  }
+body{
+  background: #DCDCDC;
+}
+.header{
+  font-size: 25px;
+  font-weight:bold;
+}
+.Login{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  text-align: center;
+  border: 2px;
+  border-radius: 20px;
+  border-style: solid;
+  border-color: red;
+  padding: 20px;
+  padding-left: 15%;
+  padding-right: 15%;
+  transform: translate(-50%, -50%);
+  box-shadow: 5px 10px 18px #888888;
+  background-color: white;
+}
+.topic-lable{
+  color: blueviolet;
+  padding-top: 2%;
+}
+.form-input:focus ~ .form--lable,
+.form-input:not(:placeholder-shown).form-input:not(:focus) ~.form--lable{
+  top:-0.5rem;
+  font-size: 0.8rem;
+  left: 0.8rem;
+}
