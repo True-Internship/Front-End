@@ -1,4 +1,3 @@
-
 import Axios from 'axios'
 import { useEffect, useState, React } from 'react'
 import * as XLSX from 'xlsx'
@@ -28,7 +27,7 @@ const SelectFile = ({ logout }) => {
   }, [])
   useEffect(() => {
     checktemp()
-  }, [])
+  }, [employeeList_error_length])
   useEffect(() => {
     delEmployee()
   }, [items])
@@ -71,6 +70,9 @@ const SelectFile = ({ logout }) => {
   }
 
   //เอาข้อมูลจากExcelเข้าdatabaseจริง
+  useEffect(()=>{
+    updateEmployee()
+  },[])
   const updateEmployee = async (id, newname, newage, newcountry, newposition, newwage) => {
     await Axios.put('http://localhost:3001/update', {
       id: id,
@@ -83,6 +85,9 @@ const SelectFile = ({ logout }) => {
   }
 
   //เอาข้อมูลจากExcelเข้าdatabase จำลอง
+  useEffect(()=>{
+    updateEmployee_temp()
+  },[])
   const updateEmployee_temp = async (id, newname, newage, newcountry, newposition, newwage) => {
     await Axios.post('http://localhost:3001/update_temp', {
       id: id,
@@ -102,11 +107,6 @@ const SelectFile = ({ logout }) => {
 
     }
     checktemp()
-    // check_length_error()
-
-    // window.location.reload(false)
-    // window.location.reload(false);
-
   }
   /**
    * 
@@ -135,14 +135,8 @@ const SelectFile = ({ logout }) => {
         reject(error);
       });
     });
-    // promise.then((d) => {
-    //   setitems(d);
-    //   console.log(items)
-    // })
   }
   const get_error = async (e) => {
-    // e.preventDefault();
-
     errList();
     setShow(!show)
     if (show === true) {
@@ -161,19 +155,11 @@ const SelectFile = ({ logout }) => {
       })
 
       if (list_null.length != 0) {
-        // console.log(employeeList_error[count],"asas")
-        // console.log(list_null)
         listErrorFull.push([employeeList_error[count], list_null])
-
+        list_null = []
       }
     });
   }
-
-  // const ref = useRef();
-
-  // const reset = () => {
-  //   ref.current.value = "";
-  // }
   async function handleSubmit(event) {
     event.preventDefault();
     const valueexcel = await readExcel(file)
@@ -183,37 +169,12 @@ const SelectFile = ({ logout }) => {
     setCount(0)
   }
 
-
   return (
     <div className="App container">
       <h1>Excel upload web</h1>
       <div>
-        {/* ดึงข้อมูลออกมาเพื่อแสดงผล */}
-        {/* <input
-          type="file"
-          ref={ref}
-          onChange={(e) => {
-
-            const file = e.target.files[0];
-
-            readExcel(file);
-          }} */}
-
-        {/* /> */}
-      </div>
-      <div >
-        {/* <button className="btn btn-primary"
-          onClick={() => { delEmployee() }}
-
-        >update</button> */}
-
-      </div>
-      <div>
         <button onClick={logout}>Logout</button>
       </div>
-      {/* <div>
-        <button onClick={delete_api}>click</button>
-      </div> */}
       <Form onSubmit={handleSubmit}>
         <Form.Group size="lg" controlId="email">
           <Form.Label>Excel upload</Form.Label>
@@ -227,9 +188,10 @@ const SelectFile = ({ logout }) => {
           update
         </Button>
       </Form>
-
       <div>
         <h1>record error</h1>
+
+
         {show ?
           <div>
             <div>can't update table employee</div>
@@ -242,22 +204,19 @@ const SelectFile = ({ logout }) => {
                         {JSON.stringify(value)}
                       </div>
                     )
-
                   })}
                   <br />
                 </div>
               )
-
             })}
           </div> : <h1></h1>}
 
         <h1>count error = {employeeList_error_length}</h1>
         <h1>count item = {items.length}</h1>
-        <button onClick={(e) => get_error(e)}>click here</button>
+        <button onClick={(e) => get_error(e)}>Show Error</button>
         {/* <button onClick={reset}>reset</button> */}
       </div>
     </div>
   );
 }
-
 export default SelectFile;
