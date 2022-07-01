@@ -30,9 +30,9 @@ body{
   color: blueviolet;
   padding-top: 2%;
 }
-.form-input:focus ~ .form--lable,
+/* .form-input:focus ~ .form--lable,
 .form-input:not(:placeholder-shown).form-input:not(:focus) ~.form--lable{
   top:-0.5rem;
   font-size: 0.8rem;
   left: 0.8rem;
-}
+} */

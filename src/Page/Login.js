@@ -44,20 +44,17 @@ const Login = ({ authenticate }) => {
                     <div class="topic-username">
                         <input
                             type="text"
-                            class="form-input"
-                            autoComplete="off"
-                            placeholder=" "
+                            placeholder="Enter..."
                             onChange={(e) => {
                                 setUserneme(e.target.value);
                             }} />
-                            <label for="username" class="form--lable">Username</label>
                     </div>
 
                     <div className="topic-lable">Password</div>
                     <div className="topic-lable">
                         <input
                             type="password"
-                            placeholder="password..."
+                            placeholder="Enter..."
                             onChange={(e) => {
                                 setPassword(e.target.value);
                             }}

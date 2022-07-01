@@ -14,6 +14,7 @@ const SelectFile = ({ logout }) => {
   // รายชื่อพนักงานทั้งหมดที่อยู่ในdatabaseจริง
   const [listErrorFull, setListErrorFull] = useState([])
   const [show, setShow] = useState(false)
+  const [checkInside, setCheckInside] = useState(false)
   useEffect(() => {
     Axios.get('http://localhost:3001/employee').then((response) => {
       setEmployeeList(response.data);
@@ -165,6 +166,7 @@ const SelectFile = ({ logout }) => {
     event.preventDefault();
     const valueexcel = await readExcel(file)
     setitems(valueexcel)
+    setCheckInside(!checkInside)
     delEmployee()
     check_length_error()
     setCount(0)
@@ -190,11 +192,9 @@ const SelectFile = ({ logout }) => {
         </Button>
       </Form>
       <div>
-        <h1>record error</h1>
-
         {show ?
           <div>
-            <div>can't update table employee</div>
+            <h1>can't update table employee</h1>
             {listErrorFull.map((data, i) => {
               return (
                 <div key={i}>
@@ -212,11 +212,23 @@ const SelectFile = ({ logout }) => {
           </div> : <h1></h1>}
 
 
-
-
+        {(employeeList_error_length === 0 || employeeList_error_length === null) ?
+          <>
+            {checkInside ?
+              <div>
+                <h1>update table success</h1>
+              </div>
+              : <div></div>
+            }
+          </> :
+          <div>
+            <h1>record error</h1>
+            <button onClick={(e) => get_error(e)}>Show Error</button>
+          </div>
+        }
         <h1>count error = {employeeList_error_length}</h1>
         <h1>count item = {items.length}</h1>
-        <button onClick={(e) => get_error(e)}>Show Error</button>
+
         {/* <button onClick={reset}>reset</button> */}
       </div>
     </div>
