@@ -15,6 +15,8 @@ const SelectFile = ({ logout }) => {
   const [listErrorFull, setListErrorFull] = useState([])
   const [show, setShow] = useState(false)
   const [checkInside, setCheckInside] = useState(false)
+  const [listColumn, setListColumn] = useState([])//list data in excel
+  const [listColumnDatabase, setListColumnDatabase] = useState([])//list data in database
   useEffect(() => {
     Axios.get('http://localhost:3001/employee').then((response) => {
       setEmployeeList(response.data);
@@ -42,6 +44,9 @@ const SelectFile = ({ logout }) => {
       setEmployeeList_error(response.data);
       setEmployeeList_error_length(response.data.length)
     })
+    console.log(listColumn,"list column")
+    console.log(Object.keys(employeeList[0]),"list column database")
+    setListColumnDatabase(Object.keys(employeeList[0]))
   }
   const delEmployee = async () => {
     await Axios.delete('http://localhost:3001/delete')
@@ -101,8 +106,12 @@ const SelectFile = ({ logout }) => {
   }
 
   const loopItem_employee_temp = async () => {
-    console.log("bbbbbb")
-    console.log(items, "write data in DB")
+    console.log(items)
+    try{
+      setListColumn(Object.keys(items[0]))
+    }catch(error){
+    }
+      
     for (let index = 0; index < items.length; index++) {
       updateEmployee_temp(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
 
@@ -171,6 +180,13 @@ const SelectFile = ({ logout }) => {
     check_length_error()
     setCount(0)
   }
+  const checkTwoColumn = () =>{
+    if (JSON.stringify(listColumn)==JSON.stringify(listColumnDatabase)) {
+      console.log("true")
+    } else {
+      console.log("false")
+    }
+  }
 
   return (
     <div className="App container">
@@ -228,6 +244,7 @@ const SelectFile = ({ logout }) => {
         }
         <h1>count error = {employeeList_error_length}</h1>
         <h1>count item = {items.length}</h1>
+        <button onClick={checkTwoColumn}>compare to</button>
 
         {/* <button onClick={reset}>reset</button> */}
       </div>
