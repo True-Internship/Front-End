@@ -44,9 +44,13 @@ const SelectFile = ({ logout }) => {
       setEmployeeList_error(response.data);
       setEmployeeList_error_length(response.data.length)
     })
-    console.log(listColumn,"list column")
-    console.log(Object.keys(employeeList[0]),"list column database")
-    setListColumnDatabase(Object.keys(employeeList[0]))
+    // console.log(listColumn,"list column")
+    // console.log(Object.keys(employeeList[0]),"list column database")
+    try {
+      setListColumnDatabase(Object.keys(employeeList[0]))
+    } catch (error) { 
+    }
+    
   }
   const delEmployee = async () => {
     await Axios.delete('http://localhost:3001/delete')
@@ -60,19 +64,20 @@ const SelectFile = ({ logout }) => {
   const check_length_error = () => {
     var count1 = 0
     setCount(count + 1)
-    console.log(count1, "count1")
-    console.log(employeeList_error.length, "check error real DB")//0 length
+    // console.log(count1, "count1")
+    // console.log(employeeList_error.length, "check error real DB")//0 length
     count1 += employeeList_error.length
-    console.log(count, "count usestate")
+    // console.log(count, "count usestate")
     if (count1 === 0 && count === 1) {
       console.log("update employee success!!")
-      console.log(count1, "count1")
+      // console.log(count1, "count1")
       for (let index = 0; index < items.length; index++) {
         updateEmployee(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
       }
     } else {
-      console.log("not update")
+      // console.log("not update")
     }
+    count1 = 0
   }
 
   //เอาข้อมูลจากExcelเข้าdatabaseจริง
@@ -106,7 +111,7 @@ const SelectFile = ({ logout }) => {
   }
 
   const loopItem_employee_temp = async () => {
-    console.log(items)
+    // console.log(items)
     try{
       setListColumn(Object.keys(items[0]))
     }catch(error){
@@ -153,7 +158,7 @@ const SelectFile = ({ logout }) => {
     if (show === true) {
       setListErrorFull([])
     }
-    console.log(listErrorFull)
+    // console.log(listErrorFull)
   }
 
   const errList = () => {
