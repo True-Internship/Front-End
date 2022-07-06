@@ -15,8 +15,9 @@ const SelectFile = ({ logout }) => {
   const [listErrorFull, setListErrorFull] = useState([])
   const [show, setShow] = useState(false)
   const [checkInside, setCheckInside] = useState(false)
-  const [listColumn, setListColumn] = useState([])//list data in excel
-  const [listColumnDatabase, setListColumnDatabase] = useState([])//list data in database
+  const [stateChecktwocolumn, setStateChecktwocolumn] = useState()//list data in excel
+  const [messageColumnFalse, setMessageColumnFalse] = useState("")
+
   useEffect(() => {
     Axios.get('http://localhost:3001/employee').then((response) => {
       setEmployeeList(response.data);
@@ -29,7 +30,7 @@ const SelectFile = ({ logout }) => {
     })
   }, [])
   useEffect(() => {
-    checktemp()
+    checkTempError()
   }, [employeeList_error_length])
   useEffect(() => {
     delEmployee()
@@ -39,18 +40,18 @@ const SelectFile = ({ logout }) => {
   }, [employeeList_error])
 
 
-  const checktemp = async () => {
+  const checkTempError = async () => {
     await Axios.get('http://localhost:3001/employee_temp_check_country').then((response) => {
       setEmployeeList_error(response.data);
       setEmployeeList_error_length(response.data.length)
     })
     // console.log(listColumn,"list column")
     // console.log(Object.keys(employeeList[0]),"list column database")
-    try {
-      setListColumnDatabase(Object.keys(employeeList[0]))
-    } catch (error) { 
-    }
-    
+    // try {
+    //   setListColumnDatabase(Object.keys(employeeList[0]))
+    // } catch (error) { 
+    // }
+
   }
   const delEmployee = async () => {
     await Axios.delete('http://localhost:3001/delete')
@@ -67,15 +68,17 @@ const SelectFile = ({ logout }) => {
     // console.log(count1, "count1")
     // console.log(employeeList_error.length, "check error real DB")//0 length
     count1 += employeeList_error.length
-    // console.log(count, "count usestate")
-    if (count1 === 0 && count === 1) {
-      console.log("update employee success!!")
+    // console.log(count1)
+    // console.log(count)
+    // console.log(stateChecktwocolumn)
+    if (count1 === 0 && count === 1 && stateChecktwocolumn) {
       // console.log(count1, "count1")
       for (let index = 0; index < items.length; index++) {
         updateEmployee(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
+        console.log("update employee success!!")
       }
     } else {
-      // console.log("not update")
+      console.log("not update")
     }
     count1 = 0
   }
@@ -109,19 +112,14 @@ const SelectFile = ({ logout }) => {
       wage: newwage
     })
   }
-
+  //เขียนข้อมูลในitemลงdatabase temp
   const loopItem_employee_temp = async () => {
     // console.log(items)
-    try{
-      setListColumn(Object.keys(items[0]))
-    }catch(error){
-    }
-      
     for (let index = 0; index < items.length; index++) {
       updateEmployee_temp(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
 
     }
-    checktemp()
+    checkTempError()
 
   }
   /**
@@ -176,21 +174,55 @@ const SelectFile = ({ logout }) => {
       }
     });
   }
+  //วางไฟล์excel ->ข้อมูลจะเข้าconst items
   async function handleSubmit(event) {
     event.preventDefault();
+    //set data in excel
+    console.log("read file excel")
     const valueexcel = await readExcel(file)
     setitems(valueexcel)
-    setCheckInside(!checkInside)
-    delEmployee()
-    check_length_error()
-    setCount(0)
+
+
+    // delEmployee()
+    // check_length_error()
+    // setCount(0)
+
   }
-  const checkTwoColumn = () =>{
-    if (JSON.stringify(listColumn)==JSON.stringify(listColumnDatabase)) {
-      console.log("true")
-    } else {
-      console.log("false")
+
+  // async function updateDatabaseMain(event) {
+  //   event.preventDefault();
+  //   delEmployee()
+  //   check_length_error()
+  //   setCount(0)
+  //   setCheckInside(!checkInside)
+  // }
+  async function checktwocolumn(event) {
+    event.preventDefault();
+    try {
+      if (JSON.stringify(Object.keys(items[0])) == JSON.stringify(Object.keys(employeeList[0]))) {
+        console.log("true")
+        console.log(Object.keys(items[0]))
+        console.log(Object.keys(employeeList[0]))
+        setStateChecktwocolumn(true)
+        delEmployee()// clean data in temp and query data in temp database
+        // check_length_error()
+        setCount(0)
+        setCheckInside(!checkInside)
+      } else {
+        console.log("false")
+        setStateChecktwocolumn(false)
+        console.log(Object.keys(items[0]))
+        console.log(Object.keys(employeeList[0]))
+        setMessageColumnFalse("Wanning!!! Column is error pleace try again")
+      }
+    } catch (error) {
     }
+
+  }
+
+  async function updateData(event) {
+    event.preventDefault();
+    check_length_error()
   }
 
   return (
@@ -201,7 +233,6 @@ const SelectFile = ({ logout }) => {
       </div>
       <Form onSubmit={handleSubmit}>
         <Form.Group size="lg" controlId="email">
-          <Form.Label>Excel upload</Form.Label>
           <Form.Control
             autoFocus
             type="file"
@@ -209,10 +240,31 @@ const SelectFile = ({ logout }) => {
           />
         </Form.Group>
         <Button block="true" size="lg" type="submit">
-          update
+          upload file
         </Button>
       </Form>
+
+      <Form onSubmit={checktwocolumn}>
+        <Button block="true" size="lg" type="submit">
+          compare fileds
+        </Button>
+      </Form>
+
+      {/* <Form onSubmit={updateDatabaseMain}>
+        <Button block="true" size="lg" type="submit">
+          update
+        </Button>
+      </Form> */}
+
+      {/* <Form onSubmit={checktwocolumn}>
+        <Form.Group size="lg" controlId="email">
+        </Form.Group>
+        <Button block="true" size="lg" type="submit">
+          compare fileds
+        </Button>
+      </Form> */}
       <div>
+        {/* list error all when click show error */}
         {show ?
           <div>
             <h1>can't update table employee</h1>
@@ -233,23 +285,41 @@ const SelectFile = ({ logout }) => {
           </div> : <h1></h1>}
 
 
-        {(employeeList_error_length === 0 || employeeList_error_length === null) ?
-          <>
-            {checkInside ?
-              <div>
-                <h1>update table success</h1>
-              </div>
-              : <div></div>
-            }
-          </> :
+        {stateChecktwocolumn ?
           <div>
-            <h1>record error</h1>
-            <button onClick={(e) => get_error(e)}>Show Error</button>
-          </div>
-        }
+            {(employeeList_error_length === 0 || employeeList_error_length === null) ?
+              <>
+                {checkInside ?
+                  <div>
+                    <h1>update table success</h1>
+                    <Form onSubmit={updateData}>
+                      <Button block="true" size="lg" type="submit">
+                        update data
+                      </Button>
+                    </Form>
+                  </div>
+                  : <div></div>
+                }
+              </> :
+              <div>
+                <h1>record error</h1>
+                <button onClick={(e) => get_error(e)}>Show Error</button>
+
+              </div>
+            }
+
+          </div> : <h1>{messageColumnFalse}</h1>}
+
+
+
+
+
+
+
+
         <h1>count error = {employeeList_error_length}</h1>
         <h1>count item = {items.length}</h1>
-        <button onClick={checkTwoColumn}>compare to</button>
+        {/* <button onClick={checkTwoColumn}>compare to</button> */}
 
         {/* <button onClick={reset}>reset</button> */}
       </div>
