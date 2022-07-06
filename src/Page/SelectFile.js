@@ -310,13 +310,6 @@ const SelectFile = ({ logout }) => {
 
           </div> : <h1>{messageColumnFalse}</h1>}
 
-
-
-
-
-
-
-
         <h1>count error = {employeeList_error_length}</h1>
         <h1>count item = {items.length}</h1>
         {/* <button onClick={checkTwoColumn}>compare to</button> */}
