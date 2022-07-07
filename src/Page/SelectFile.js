@@ -17,6 +17,9 @@ const SelectFile = ({ logout }) => {
   const [checkInside, setCheckInside] = useState(false)
   const [stateChecktwocolumn, setStateChecktwocolumn] = useState()//list data in excel
   const [messageColumnFalse, setMessageColumnFalse] = useState("")
+  const [messageUpdateFalse, setMessageUpdateFalse] = useState("")
+  const [countUsestateForlengthListError, setcountUsestateForlengthListError] = useState(0)
+  const [resultCheckLengthError, setResultCheckLengthError] = useState("")
 
   useEffect(() => {
     Axios.get('http://localhost:3001/employee').then((response) => {
@@ -35,9 +38,7 @@ const SelectFile = ({ logout }) => {
   useEffect(() => {
     delEmployee()
   }, [items])
-  useEffect(() => {
-    check_length_error()
-  }, [employeeList_error])
+
 
 
   const checkTempError = async () => {
@@ -63,24 +64,24 @@ const SelectFile = ({ logout }) => {
 
 
   const check_length_error = () => {
-    var count1 = 0
-    setCount(count + 1)
-    // console.log(count1, "count1")
-    // console.log(employeeList_error.length, "check error real DB")//0 length
-    count1 += employeeList_error.length
-    // console.log(count1)
-    // console.log(count)
-    // console.log(stateChecktwocolumn)
-    if (count1 === 0 && count === 1 && stateChecktwocolumn) {
+
+    if (employeeList_error.length === 0) {
       // console.log(count1, "count1")
       for (let index = 0; index < items.length; index++) {
         updateEmployee(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
-        console.log("update employee success!!")
       }
+      console.log("update employee success!!")
+      console.log("true")
+      setResultCheckLengthError("true")
+
     } else {
+      setMessageUpdateFalse("don't update")
+      setResultCheckLengthError("false")
+      console.log("false")
+
       console.log("not update")
     }
-    count1 = 0
+    setCount(count + 1)
   }
 
   //เอาข้อมูลจากExcelเข้าdatabaseจริง
@@ -207,13 +208,13 @@ const SelectFile = ({ logout }) => {
         delEmployee()// clean data in temp and query data in temp database
         // check_length_error()
         setCount(0)
-        setCheckInside(!checkInside)
+        setCheckInside(!checkInside)//ปิด เปิด show error
       } else {
         console.log("false")
         setStateChecktwocolumn(false)
         console.log(Object.keys(items[0]))
         console.log(Object.keys(employeeList[0]))
-        setMessageColumnFalse("Wanning!!! Column is error pleace try again")
+        setMessageColumnFalse("Warning!!! Column is error please try again")
       }
     } catch (error) {
     }
@@ -222,7 +223,9 @@ const SelectFile = ({ logout }) => {
 
   async function updateData(event) {
     event.preventDefault();
+    setcountUsestateForlengthListError(countUsestateForlengthListError + 1)
     check_length_error()
+
   }
 
   return (
@@ -250,24 +253,64 @@ const SelectFile = ({ logout }) => {
         </Button>
       </Form>
 
-      {/* <Form onSubmit={updateDatabaseMain}>
-        <Button block="true" size="lg" type="submit">
-          update
-        </Button>
-      </Form> */}
-
-      {/* <Form onSubmit={checktwocolumn}>
-        <Form.Group size="lg" controlId="email">
-        </Form.Group>
-        <Button block="true" size="lg" type="submit">
-          compare fileds
-        </Button>
-      </Form> */}
       <div>
-        {/* list error all when click show error */}
+        {/* ถ้าcolumnไม่error จะแสดงปุ่มupdate date */}
+        {stateChecktwocolumn ?
+          <div>
+            <h1>you can update</h1>
+            <Form onSubmit={updateData}>
+              <Button block="true" size="lg" type="submit">
+                update data
+              </Button>
+            </Form>
+
+            {/*  */}
+          </div> : <h1>{messageColumnFalse}</h1>}
+
+
+        {/* 
+        {resultCheckLengthError ?
+          <>
+            {checkInside ?
+              <div>
+                <h1>update table success</h1>
+              </div>
+              : <div>
+                {!resultCheckLengthError ?
+                  <div>
+                    <h1>record error</h1>
+                    <button onClick={(e) => get_error(e)}>Show Error</button>
+                  </div>
+                  :
+                  <div></div>
+                }
+              </div>
+            }
+          </> :
+          <div>
+          </div>
+        } */}
+
+
+        {resultCheckLengthError === "true" ?
+          <div>
+            <h1>success update</h1>
+          </div>
+          :
+          <div>
+            {resultCheckLengthError === "false" ?
+              <div>
+                <h1>record error</h1>
+                <button onClick={(e) => get_error(e)}>Show Error</button>
+              </div>
+              :
+              <div></div>
+            }
+          </div>
+        }
+
         {show ?
           <div>
-            <h1>can't update table employee</h1>
             {listErrorFull.map((data, i) => {
               return (
                 <div key={i}>
@@ -283,35 +326,19 @@ const SelectFile = ({ logout }) => {
               )
             })}
           </div> : <h1></h1>}
+        {/* 
+        {checkFalse ?
+          <>
+            <h1>record error</h1>
+            <button onClick={(e) => get_error(e)}>Show Error</button>
+          </> :
+          <div></div>
+        } */}
 
-
-        {stateChecktwocolumn ?
-          <div>
-            {(employeeList_error_length === 0 || employeeList_error_length === null) ?
-              <>
-                {checkInside ?
-                  <div>
-                    <h1>update table success</h1>
-                    <Form onSubmit={updateData}>
-                      <Button block="true" size="lg" type="submit">
-                        update data
-                      </Button>
-                    </Form>
-                  </div>
-                  : <div></div>
-                }
-              </> :
-              <div>
-                <h1>record error</h1>
-                <button onClick={(e) => get_error(e)}>Show Error</button>
-
-              </div>
-            }
-
-          </div> : <h1>{messageColumnFalse}</h1>}
 
         <h1>count error = {employeeList_error_length}</h1>
         <h1>count item = {items.length}</h1>
+        <h1>result = {resultCheckLengthError}</h1>
         {/* <button onClick={checkTwoColumn}>compare to</button> */}
 
         {/* <button onClick={reset}>reset</button> */}
