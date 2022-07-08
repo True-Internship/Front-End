@@ -15,7 +15,7 @@ const SelectFile = ({ logout }) => {
   const [listErrorFull, setListErrorFull] = useState([])
   const [show, setShow] = useState(false)
   const [checkInside, setCheckInside] = useState(false)
-  const [stateChecktwocolumn, setStateChecktwocolumn] = useState()//list data in excel
+  const [stateChecktwocolumn, setStateChecktwocolumn] = useState("")
   const [messageColumnFalse, setMessageColumnFalse] = useState("")
   const [messageUpdateFalse, setMessageUpdateFalse] = useState("")
   const [countUsestateForlengthListError, setcountUsestateForlengthListError] = useState(0)
@@ -204,14 +204,14 @@ const SelectFile = ({ logout }) => {
         console.log("true")
         console.log(Object.keys(items[0]))
         console.log(Object.keys(employeeList[0]))
-        setStateChecktwocolumn(true)
+        setStateChecktwocolumn("true")
         delEmployee()// clean data in temp and query data in temp database
         // check_length_error()
         setCount(0)
         setCheckInside(!checkInside)//ปิด เปิด show error
       } else {
         console.log("false")
-        setStateChecktwocolumn(false)
+        setStateChecktwocolumn("false")
         console.log(Object.keys(items[0]))
         console.log(Object.keys(employeeList[0]))
         setMessageColumnFalse("Warning!!! Column is error please try again")
@@ -219,10 +219,17 @@ const SelectFile = ({ logout }) => {
     } catch (error) {
     }
 
+    if (stateChecktwocolumn === "true") {
+      updateData()
+    } else {
+      if (stateChecktwocolumn === "false") {
+        console.log("warnning you can't update table")
+      }
+    }
+
   }
 
-  async function updateData(event) {
-    event.preventDefault();
+  const updateData = ()=> {
     setcountUsestateForlengthListError(countUsestateForlengthListError + 1)
     check_length_error()
 
@@ -254,8 +261,7 @@ const SelectFile = ({ logout }) => {
       </Form>
 
       <div>
-        {/* ถ้าcolumnไม่error จะแสดงปุ่มupdate date */}
-        {stateChecktwocolumn ?
+        {/* {stateChecktwocolumn ?
           <div>
             <h1>you can update</h1>
             <Form onSubmit={updateData}>
@@ -263,9 +269,7 @@ const SelectFile = ({ logout }) => {
                 update data
               </Button>
             </Form>
-
-            {/*  */}
-          </div> : <h1>{messageColumnFalse}</h1>}
+          </div> : <h1>{messageColumnFalse}</h1>} */}
 
 
         {/* 
@@ -290,6 +294,11 @@ const SelectFile = ({ logout }) => {
           <div>
           </div>
         } */}
+        {stateChecktwocolumn ==="false"?
+        <div><h1>warnning fileds error</h1></div>
+        :<div></div>
+
+        }
 
 
         {resultCheckLengthError === "true" ?
@@ -308,7 +317,6 @@ const SelectFile = ({ logout }) => {
             }
           </div>
         }
-
         {show ?
           <div>
             {listErrorFull.map((data, i) => {
@@ -326,14 +334,7 @@ const SelectFile = ({ logout }) => {
               )
             })}
           </div> : <h1></h1>}
-        {/* 
-        {checkFalse ?
-          <>
-            <h1>record error</h1>
-            <button onClick={(e) => get_error(e)}>Show Error</button>
-          </> :
-          <div></div>
-        } */}
+
 
 
         <h1>count error = {employeeList_error_length}</h1>
