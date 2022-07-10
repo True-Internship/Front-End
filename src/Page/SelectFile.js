@@ -17,7 +17,8 @@ const SelectFile = ({ logout }) => {
   const [checkInside, setCheckInside] = useState(false)
   const [stateChecktwocolumn, setStateChecktwocolumn] = useState("")
   const [messageUpdateFalse, setMessageUpdateFalse] = useState("")
-  const [resultCheckLengthError, setResultCheckLengthError] = useState("")
+  const [resultCheckLengthError, setResultCheckLengthError] = useState(false)
+  const [isClick, setIsClick] = useState(false)
 
   useEffect(() => {
     Axios.get('http://localhost:3001/employee').then((response) => {
@@ -30,9 +31,9 @@ const SelectFile = ({ logout }) => {
       setEmployeeList_temp(response.data);
     })
   }, [])
-  useEffect(() => {
-    checkTempError()
-  }, [employeeList_error_length])
+  // useEffect(() => {
+  //   checkTempError()
+  // }, [employeeList_error_length])
   useEffect(() => {
     delEmployee()
   }, [items])
@@ -43,6 +44,9 @@ const SelectFile = ({ logout }) => {
     await Axios.get('http://localhost:3001/employee_temp_check_country').then((response) => {
       setEmployeeList_error(response.data);
       setEmployeeList_error_length(response.data.length)
+      console.log(response.data.length, 'country')
+      check_length_error(response.data.length) 
+
     })
     // console.log(listColumn,"list column")
     // console.log(Object.keys(employeeList[0]),"list column database")
@@ -50,31 +54,34 @@ const SelectFile = ({ logout }) => {
     //   setListColumnDatabase(Object.keys(employeeList[0]))
     // } catch (error) { 
     // }
-
+    console.log(employeeList_error_length, "987456")
   }
   const delEmployee = async () => {
-    await Axios.delete('http://localhost:3001/delete')
-    // setEmployeeList_error([]);
+
+    await Axios.delete('http://localhost:3001/delete').then(() => {
+      loopItem_employee_temp()
+
+    })
     // setEmployeeList_error_length(null)
-    loopItem_employee_temp()
+    console.log("654")
     // readExcel(file)
   }
 
 
-  const check_length_error = () => {
-
-    if (employeeList_error.length === 0) {
+  const check_length_error = (length) => {
+    console.log(employeeList_error_length, 'le')
+    if (length === 0) {
       // console.log(count1, "count1")
       for (let index = 0; index < items.length; index++) {
         updateEmployee(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
       }
       console.log("update employee success!!")
       console.log("true")
-      setResultCheckLengthError("true")
+      setResultCheckLengthError(true)
 
     } else {
       setMessageUpdateFalse("don't update")
-      setResultCheckLengthError("false")
+      setResultCheckLengthError(false)
       console.log("false")
 
       console.log("not update")
@@ -113,12 +120,13 @@ const SelectFile = ({ logout }) => {
   }
   //เขียนข้อมูลในitemลงdatabase temp
   const loopItem_employee_temp = async () => {
-    // console.log(items)
+    console.log(items.length, "qweqwe")
     for (let index = 0; index < items.length; index++) {
       updateEmployee_temp(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
 
     }
     checkTempError()
+    console.log("mnblkj")
 
   }
   /**
@@ -149,7 +157,7 @@ const SelectFile = ({ logout }) => {
       });
     });
 
-    
+
   }
   const get_error = async (e) => {
     errList();
@@ -175,33 +183,32 @@ const SelectFile = ({ logout }) => {
       }
     });
   }
+
   //วางไฟล์excel ->ข้อมูลจะเข้าconst items
   async function handleSubmit(event) {
     event.preventDefault();
     //set data in excel
+    setIsClick(!isClick)
     const valueexcel = await readExcel(file)
     setitems(valueexcel)
     console.log("read file excel")
+
     try {
-      if (JSON.stringify(Object.keys(items[0])) == JSON.stringify(Object.keys(employeeList[0]))) {
+      if (JSON.stringify(Object.keys(valueexcel[0])) == JSON.stringify(Object.keys(employeeList[0]))) {
+        console.log(items,)
         console.log("compare fileds is true")
-        console.log(Object.keys(items[0]))
-        console.log(Object.keys(employeeList[0]))
         setStateChecktwocolumn("true")
         delEmployee()// clean data in temp and query data in temp database
         // check_length_error()
+        console.log(resultCheckLengthError, "dol")
         setCount(0)
         setCheckInside(!checkInside)//ปิด เปิด show error
-        updateData()
       } else {
         console.log("compare fileds is false")
         setStateChecktwocolumn("false")
-        console.log(Object.keys(items[0]))
-        console.log(Object.keys(employeeList[0]))
       }
     } catch (error) {
     }
-
 
 
     // delEmployee()
@@ -272,17 +279,41 @@ const SelectFile = ({ logout }) => {
       </Form> */}
 
       <div>
-        {stateChecktwocolumn === "false" ?
-          <div><h1>warnning fileds error</h1></div>
-          : <div></div>
+        {stateChecktwocolumn === "true" ?
+          <div>
+            {isClick ?
+              <div>
+                {resultCheckLengthError ?
+                  <div><h1>success</h1></div>
+                  :
+                  <div>
+                    <h1>record error</h1>
+                    <button onClick={(e) => get_error(e)}>Show Error</button>
+                  </div>
+                }
+              </div>
+              :
+              <div></div>
+
+            }
+
+          </div>
+          : <div>
+            {stateChecktwocolumn === "false" ?
+            <div>Warnning Column error</div>
+            :
+            <div></div>
+            }
+          </div>
 
         }
 
 
-        {resultCheckLengthError === "true" ?
+        {/* {resultCheckLengthError === "true" ?
           <div>
             <h1>success update</h1>
           </div>
+
           :
           <div>
             {resultCheckLengthError === "false" ?
@@ -291,10 +322,19 @@ const SelectFile = ({ logout }) => {
                 <button onClick={(e) => get_error(e)}>Show Error</button>
               </div>
               :
-              <div></div>
+              <div>
+
+              </div>
             }
           </div>
-        }
+
+        } */}
+
+
+
+
+
+
         {show ?
           <div>
             {listErrorFull.map((data, i) => {
