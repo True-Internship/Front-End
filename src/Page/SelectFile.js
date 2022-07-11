@@ -45,7 +45,7 @@ const SelectFile = ({ logout }) => {
       setEmployeeList_error(response.data);
       setEmployeeList_error_length(response.data.length)
       console.log(response.data.length, 'country')
-      check_length_error(response.data.length) 
+      check_length_error(response.data.length)
 
     })
     // console.log(listColumn,"list column")
@@ -70,22 +70,26 @@ const SelectFile = ({ logout }) => {
 
   const check_length_error = (length) => {
     console.log(employeeList_error_length, 'le')
-    if (length === 0) {
-      // console.log(count1, "count1")
-      for (let index = 0; index < items.length; index++) {
-        updateEmployee(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
+    try {
+      if ((length === 0) && (JSON.stringify(Object.keys(items[0])) == JSON.stringify(Object.keys(employeeList[0])))) {
+        // console.log(count1, "count1")
+        for (let index = 0; index < items.length; index++) {
+          updateEmployee(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
+        }
+        console.log("update employee success!!")
+        console.log("true")
+        setResultCheckLengthError(true)
+
+      } else {
+        setMessageUpdateFalse("don't update")
+        setResultCheckLengthError(false)
+        console.log("false")
+
+        console.log("not update")
       }
-      console.log("update employee success!!")
-      console.log("true")
-      setResultCheckLengthError(true)
-
-    } else {
-      setMessageUpdateFalse("don't update")
-      setResultCheckLengthError(false)
-      console.log("false")
-
-      console.log("not update")
+    } catch (error) {
     }
+
     setCount(count + 1)
   }
 
@@ -192,9 +196,9 @@ const SelectFile = ({ logout }) => {
     const valueexcel = await readExcel(file)
     setitems(valueexcel)
     console.log("read file excel")
-
+    const checkCompare = JSON.stringify(Object.keys(valueexcel[0])) == JSON.stringify(Object.keys(employeeList[0]))
     try {
-      if (JSON.stringify(Object.keys(valueexcel[0])) == JSON.stringify(Object.keys(employeeList[0]))) {
+      if (checkCompare) {
         console.log(items,)
         console.log("compare fileds is true")
         setStateChecktwocolumn("true")
@@ -300,9 +304,9 @@ const SelectFile = ({ logout }) => {
           </div>
           : <div>
             {stateChecktwocolumn === "false" ?
-            <div>Warnning Column error</div>
-            :
-            <div></div>
+              <div><h1>Warnning Column error</h1></div>
+              :
+              <div></div>
             }
           </div>
 
