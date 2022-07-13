@@ -39,12 +39,11 @@ const SelectFile = ({ logout }) => {
   }, [items])
 
 
-
   const checkTempError = async () => {
     await Axios.get('http://localhost:3001/employee_temp_check_country').then((response) => {
+      console.log(response.data.length, 'country')
       setEmployeeList_error(response.data);
       setEmployeeList_error_length(response.data.length)
-      console.log(response.data.length, 'country')
       check_length_error(response.data.length)
 
     })
@@ -67,14 +66,45 @@ const SelectFile = ({ logout }) => {
     // readExcel(file)
   }
 
-
+  ///////////////////////////////////////////////////////////////
   const check_length_error = (length) => {
     console.log(employeeList_error_length, 'le')
     try {
       if ((length === 0) && (JSON.stringify(Object.keys(items[0])) == JSON.stringify(Object.keys(employeeList[0])))) {
         // console.log(count1, "count1")
         for (let index = 0; index < items.length; index++) {
-          updateEmployee(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
+          updateEmployee(
+            items[index].companygroup,
+            items[index].companyname,
+            items[index].empid,
+            items[index].identification,
+            items[index].b_dd,
+            items[index].b_mm,
+            items[index].b_yyyy,
+            items[index].salutation_thai,
+            items[index].thai_firstname,
+            items[index].thai_lastname,
+            items[index].Thai_Fullname,
+            items[index].salutation_eng,
+            items[index].eng_firstname,
+            items[index].eng_lastname,
+            items[index].position,
+            items[index].email,
+            items[index].positioncode,
+            items[index].phone_No,
+            items[index].province,
+            items[index].worksite,
+            items[index].employment_Type,
+            items[index].worktype,
+            items[index].Report,
+            items[index].SalLessThan15k,
+            items[index].joindate,
+            items[index].business_SIM,
+            items[index].Nation,
+            items[index].vip,
+            items[index].ConsentDM,
+
+          )
         }
         console.log("update employee success!!")
         console.log("true")
@@ -88,8 +118,8 @@ const SelectFile = ({ logout }) => {
         console.log("not update")
       }
     } catch (error) {
-    }
 
+    }
     setCount(count + 1)
   }
 
@@ -97,14 +127,67 @@ const SelectFile = ({ logout }) => {
   useEffect(() => {
     updateEmployee()
   }, [])
-  const updateEmployee = async (id, newname, newage, newcountry, newposition, newwage) => {
+  const updateEmployee = async (
+    newcompanygroup,
+    newcompanyname,
+    newempid,
+    newidentification,
+    newb_dd,
+    newb_mm,
+    newb_yyyy,
+    newsalutation_thai,
+    newthai_firstname,
+    newthai_lastname,
+    newThai_Fullname,
+    newsalutation_eng,
+    neweng_firstname,
+    neweng_lastname,
+    newposition,
+    newemail,
+    newpositioncode,
+    newphone_No,
+    newprovince,
+    newworksite,
+    newemployment_Type,
+    newworktype,
+    newReport,
+    newSalLessThan15k,
+    newjoindate,
+    newbusiness_SIM,
+    newNation,
+    newvip,
+    newConsentDM
+  ) => {
     await Axios.put('http://localhost:3001/update', {
-      id: id,
-      name: newname,
-      age: newage,
-      country: newcountry,
+      companygroup: newcompanygroup,
+      companyname: newcompanyname,
+      empid: newempid,
+      identification: newidentification,
+      b_dd: newb_dd,
+      b_mm: newb_mm,
+      b_yyyy: newb_yyyy,
+      salutation_thai: newsalutation_thai,
+      thai_firstname: newthai_firstname,
+      thai_lastname: newthai_lastname,
+      Thai_Fullname: newThai_Fullname,
+      salutation_eng: newsalutation_eng,
+      eng_firstname: neweng_firstname,
+      eng_lastname: neweng_lastname,
       position: newposition,
-      wage: newwage
+      email: newemail,
+      positioncode: newpositioncode,
+      phone_No: newphone_No,
+      province: newprovince,
+      worksite: newworksite,
+      employment_Type: newemployment_Type,
+      worktype: newworktype,
+      Report: newReport,
+      SalLessThan15k: newSalLessThan15k,
+      joindate: newjoindate,
+      business_SIM: newbusiness_SIM,
+      Nation: newNation,
+      vip: newvip,
+      ConsentDM: newConsentDM,
     })
   }
 
@@ -112,21 +195,104 @@ const SelectFile = ({ logout }) => {
   useEffect(() => {
     updateEmployee_temp()
   }, [])
-  const updateEmployee_temp = async (id, newname, newage, newcountry, newposition, newwage) => {
+  const updateEmployee_temp = async (
+    newcompanygroup,
+    newcompanyname,
+    newempid,
+    newidentification,
+    newb_dd,
+    newb_mm,
+    newb_yyyy,
+    newsalutation_thai,
+    newthai_firstname,
+    newthai_lastname,
+    newThai_Fullname,
+    newsalutation_eng,
+    neweng_firstname,
+    neweng_lastname,
+    newposition,
+    newemail,
+    newpositioncode,
+    newphone_No,
+    newprovince,
+    newworksite,
+    newemployment_Type,
+    newworktype,
+    newReport,
+    newSalLessThan15k,
+    newjoindate,
+    newbusiness_SIM,
+    newNation,
+    newvip,
+    newConsentDM) => {
     await Axios.post('http://localhost:3001/update_temp', {
-      id: id,
-      name: newname,
-      age: newage,
-      country: newcountry,
+      companygroup: newcompanygroup,
+      companyname: newcompanyname,
+      empid: newempid,
+      identification: newidentification,
+      b_dd: newb_dd,
+      b_mm: newb_mm,
+      b_yyyy: newb_yyyy,
+      salutation_thai: newsalutation_thai,
+      thai_firstname: newthai_firstname,
+      thai_lastname: newthai_lastname,
+      Thai_Fullname: newThai_Fullname,
+      salutation_eng: newsalutation_eng,
+      eng_firstname: neweng_firstname,
+      eng_lastname: neweng_lastname,
       position: newposition,
-      wage: newwage
+      email: newemail,
+      positioncode: newpositioncode,
+      phone_No: newphone_No,
+      province: newprovince,
+      worksite: newworksite,
+      employment_Type: newemployment_Type,
+      worktype: newworktype,
+      Report: newReport,
+      SalLessThan15k: newSalLessThan15k,
+      joindate: newjoindate,
+      business_SIM: newbusiness_SIM,
+      Nation: newNation,
+      vip: newvip,
+      ConsentDM: newConsentDM,
     })
   }
   //เขียนข้อมูลในitemลงdatabase temp
   const loopItem_employee_temp = async () => {
-    console.log(items.length, "qweqwe")
+    console.log(items, "qweqwe")
     for (let index = 0; index < items.length; index++) {
-      updateEmployee_temp(items[index].id, items[index].name, (items[index].age).toString(), items[index].country, items[index].position, (items[index].wage).toString())
+      console.log(items[index].companygroup, "index")
+      updateEmployee_temp(
+        items[index].companygroup,
+        items[index].companyname,
+        items[index].empid,
+        items[index].identification,
+        items[index].b_dd,
+        items[index].b_mm,
+        items[index].b_yyyy,
+        items[index].salutation_thai,
+        items[index].thai_firstname,
+        items[index].thai_lastname,
+        items[index].Thai_Fullname,
+        items[index].salutation_eng,
+        items[index].eng_firstname,
+        items[index].eng_lastname,
+        items[index].position,
+        items[index].email,
+        items[index].positioncode,
+        items[index].phone_No,
+        items[index].province,
+        items[index].worksite,
+        items[index].employment_Type,
+        items[index].worktype,
+        items[index].Report,
+        items[index].SalLessThan15k,
+        items[index].joindate,
+        items[index].business_SIM,
+        items[index].Nation,
+        items[index].vip,
+        items[index].ConsentDM,
+      )
 
     }
     checkTempError()
@@ -178,6 +344,7 @@ const SelectFile = ({ logout }) => {
       Object.keys(employeeList_error[count]).forEach(function (key) { //key == 0,1
         if (employeeList_error[count][key] == null) {
           list_null.push(key)
+          console.log(key)
         }
       })
 
@@ -196,10 +363,15 @@ const SelectFile = ({ logout }) => {
     const valueexcel = await readExcel(file)
     setitems(valueexcel)
     console.log("read file excel")
+    try {
+      console.log(Object.keys(valueexcel[0]))
+      console.log(Object.keys(employeeList[0]))
+
+    } catch (error) {
+    }
     const checkCompare = JSON.stringify(Object.keys(valueexcel[0])) == JSON.stringify(Object.keys(employeeList[0]))
     try {
       if (checkCompare) {
-        console.log(items,)
         console.log("compare fileds is true")
         setStateChecktwocolumn("true")
         delEmployee()// clean data in temp and query data in temp database
@@ -207,6 +379,7 @@ const SelectFile = ({ logout }) => {
         console.log(resultCheckLengthError, "dol")
         setCount(0)
         setCheckInside(!checkInside)//ปิด เปิด show error
+        console.log("123")
       } else {
         console.log("compare fileds is false")
         setStateChecktwocolumn("false")
