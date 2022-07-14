@@ -17,7 +17,7 @@ const SelectFile = ({ logout }) => {
   const [checkInside, setCheckInside] = useState(false)
   const [stateChecktwocolumn, setStateChecktwocolumn] = useState("")
   const [messageUpdateFalse, setMessageUpdateFalse] = useState("")
-  const [resultCheckLengthError, setResultCheckLengthError] = useState(false)
+  const [resultCheckLengthError, setResultCheckLengthError] = useState("")
   const [isClick, setIsClick] = useState(false)
   const [codeState, setCodeState] = useState("")
 
@@ -41,7 +41,7 @@ const SelectFile = ({ logout }) => {
     await Axios.get('http://localhost:3001/employee_temp_check_country').then((response) => {
       setEmployeeList_error(response.data);
       setEmployeeList_error_length(response.data.length)
-      check_length_error(response.data.length,booleanCom)
+      check_length_error(response.data.length, booleanCom)
 
     })
     // console.log(listColumn,"list column")
@@ -68,7 +68,7 @@ const SelectFile = ({ logout }) => {
 
   ///////////////////////////////////////////////////////////////
 
-  const check_length_error = (length,booleanCom) => {
+  const check_length_error = (length, booleanCom) => {
     try {
       if ((length === 0) && (JSON.stringify(Object.keys(items[0])) == JSON.stringify(Object.keys(employeeList[0])))) {
         console.log("into check obj")
@@ -109,13 +109,13 @@ const SelectFile = ({ logout }) => {
 
           }
           console.log("update employee success!!")
-          setResultCheckLengthError(true)
+          setResultCheckLengthError("true")
         } else {
-            console.log("company code and group code is not macth")   
+          console.log("company code and group code is not macth")
         }
       } else {
         setMessageUpdateFalse("don't update employee")
-        setResultCheckLengthError(false)
+        setResultCheckLengthError("false")
         console.log("update employee not success!!")
       }
     } catch (error) {
@@ -472,12 +472,20 @@ const SelectFile = ({ logout }) => {
           <div>
             {isClick ?
               <div>
-                {resultCheckLengthError ?
+                {resultCheckLengthError === "true" ?
                   <div><h1>success</h1></div>
                   :
                   <div>
-                    <h1>record error</h1>
-                    <button onClick={(e) => get_error(e)}>Show Error</button>
+                    {resultCheckLengthError === "false" ?
+                      <div>
+                        <h1>record error</h1>
+                        <button onClick={(e) => get_error(e)}>Show Error</button>
+                      </div>
+                      :
+                      <div><h1>company code and group code is not macth</h1></div>
+                    }
+                    {/* <h1>record error</h1>
+                    <button onClick={(e) => get_error(e)}>Show Error</button> */}
                   </div>
                 }
               </div>
