@@ -19,6 +19,7 @@ const SelectFile = ({ logout }) => {
   const [messageUpdateFalse, setMessageUpdateFalse] = useState("")
   const [resultCheckLengthError, setResultCheckLengthError] = useState(false)
   const [isClick, setIsClick] = useState(false)
+  const [codeState, setCodeState] = useState("")
 
   useEffect(() => {
     Axios.get('http://localhost:3001/employee').then((response) => {
@@ -34,17 +35,13 @@ const SelectFile = ({ logout }) => {
   // useEffect(() => {
   //   checkTempError()
   // }, [employeeList_error_length])
-  useEffect(() => {
-    delEmployee()
-  }, [items])
 
 
-  const checkTempError = async () => {
+  const checkTempError = async (booleanCom) => {
     await Axios.get('http://localhost:3001/employee_temp_check_country').then((response) => {
-      console.log(response.data.length, 'country')
       setEmployeeList_error(response.data);
       setEmployeeList_error_length(response.data.length)
-      check_length_error(response.data.length)
+      check_length_error(response.data.length,booleanCom)
 
     })
     // console.log(listColumn,"list column")
@@ -53,8 +50,12 @@ const SelectFile = ({ logout }) => {
     //   setListColumnDatabase(Object.keys(employeeList[0]))
     // } catch (error) { 
     // }
-    console.log(employeeList_error_length, "987456")
   }
+  useEffect(() => {
+    delEmployee()
+  }, [items])
+
+
   const delEmployee = async () => {
 
     await Axios.delete('http://localhost:3001/delete').then(() => {
@@ -62,60 +63,60 @@ const SelectFile = ({ logout }) => {
 
     })
     // setEmployeeList_error_length(null)
-    console.log("654")
     // readExcel(file)
   }
 
   ///////////////////////////////////////////////////////////////
-  const check_length_error = (length) => {
-    console.log(employeeList_error_length, 'le')
+
+  const check_length_error = (length,booleanCom) => {
     try {
       if ((length === 0) && (JSON.stringify(Object.keys(items[0])) == JSON.stringify(Object.keys(employeeList[0])))) {
-        // console.log(count1, "count1")
-        for (let index = 0; index < items.length; index++) {
-          updateEmployee(
-            items[index].companygroup,
-            items[index].companyname,
-            items[index].empid,
-            items[index].identification,
-            items[index].b_dd,
-            items[index].b_mm,
-            items[index].b_yyyy,
-            items[index].salutation_thai,
-            items[index].thai_firstname,
-            items[index].thai_lastname,
-            items[index].Thai_Fullname,
-            items[index].salutation_eng,
-            items[index].eng_firstname,
-            items[index].eng_lastname,
-            items[index].position,
-            items[index].email,
-            items[index].positioncode,
-            items[index].phone_No,
-            items[index].province,
-            items[index].worksite,
-            items[index].employment_Type,
-            items[index].worktype,
-            items[index].Report,
-            items[index].SalLessThan15k,
-            items[index].joindate,
-            items[index].business_SIM,
-            items[index].Nation,
-            items[index].vip,
-            items[index].ConsentDM,
+        console.log("into check obj")
+        if (booleanCom) {
+          console.log("into update employee")
+          for (let index = 0; index < items.length; index++) {
+            updateEmployee(
+              items[index].companygroup,
+              items[index].companyname,
+              items[index].empid,
+              items[index].identification,
+              items[index].b_dd,
+              items[index].b_mm,
+              items[index].b_yyyy,
+              items[index].salutation_thai,
+              items[index].thai_firstname,
+              items[index].thai_lastname,
+              items[index].Thai_Fullname,
+              items[index].salutation_eng,
+              items[index].eng_firstname,
+              items[index].eng_lastname,
+              items[index].position,
+              items[index].email,
+              items[index].positioncode,
+              items[index].phone_No,
+              items[index].province,
+              items[index].worksite,
+              items[index].employment_Type,
+              items[index].worktype,
+              items[index].Report,
+              items[index].SalLessThan15k,
+              items[index].joindate,
+              items[index].business_SIM,
+              items[index].Nation,
+              items[index].vip,
+              items[index].ConsentDM,
+            )
 
-          )
+          }
+          console.log("update employee success!!")
+          setResultCheckLengthError(true)
+        } else {
+            console.log("company code and group code is not macth")   
         }
-        console.log("update employee success!!")
-        console.log("true")
-        setResultCheckLengthError(true)
-
       } else {
-        setMessageUpdateFalse("don't update")
+        setMessageUpdateFalse("don't update employee")
         setResultCheckLengthError(false)
-        console.log("false")
-
-        console.log("not update")
+        console.log("update employee not success!!")
       }
     } catch (error) {
 
@@ -192,9 +193,9 @@ const SelectFile = ({ logout }) => {
   }
 
   //เอาข้อมูลจากExcelเข้าdatabase จำลอง
-  useEffect(() => {
-    updateEmployee_temp()
-  }, [])
+  // useEffect(() => {
+  //   updateEmployee_temp()
+  // }, [])
   const updateEmployee_temp = async (
     newcompanygroup,
     newcompanyname,
@@ -255,13 +256,35 @@ const SelectFile = ({ logout }) => {
       Nation: newNation,
       vip: newvip,
       ConsentDM: newConsentDM,
+    }).then((response) => {
+      checkCompositeCode(newcompanygroup, newcompanyname)
     })
   }
+  // useEffect(() => {
+  //   checkCompositeCode()
+  // }, [codeState])
+
+  const checkCompositeCode = async (newcompanygroup, newcompanyname) => {
+    await Axios.post("http://localhost:3001/check_composite_code", {
+      GroupCode: newcompanygroup,
+      CompanyCode: newcompanyname,
+    }).then((response) => {
+      if (items.length != 0) {
+        if (response.data.message) {
+          checkTempError(false)
+          console.log("CompositeCode message false")
+        } else {
+          checkTempError(true)
+          console.log("CompositeCode message true")
+        }
+      }
+    })
+
+  }
+
   //เขียนข้อมูลในitemลงdatabase temp
   const loopItem_employee_temp = async () => {
-    console.log(items, "qweqwe")
     for (let index = 0; index < items.length; index++) {
-      console.log(items[index].companygroup, "index")
       updateEmployee_temp(
         items[index].companygroup,
         items[index].companyname,
@@ -295,8 +318,6 @@ const SelectFile = ({ logout }) => {
       )
 
     }
-    checkTempError()
-    console.log("mnblkj")
 
   }
   /**
@@ -344,7 +365,6 @@ const SelectFile = ({ logout }) => {
       Object.keys(employeeList_error[count]).forEach(function (key) { //key == 0,1
         if (employeeList_error[count][key] == null) {
           list_null.push(key)
-          console.log(key)
         }
       })
 
@@ -363,12 +383,6 @@ const SelectFile = ({ logout }) => {
     const valueexcel = await readExcel(file)
     setitems(valueexcel)
     console.log("read file excel")
-    try {
-      console.log(Object.keys(valueexcel[0]))
-      console.log(Object.keys(employeeList[0]))
-
-    } catch (error) {
-    }
     const checkCompare = JSON.stringify(Object.keys(valueexcel[0])) == JSON.stringify(Object.keys(employeeList[0]))
     try {
       if (checkCompare) {
@@ -376,10 +390,8 @@ const SelectFile = ({ logout }) => {
         setStateChecktwocolumn("true")
         delEmployee()// clean data in temp and query data in temp database
         // check_length_error()
-        console.log(resultCheckLengthError, "dol")
         setCount(0)
         setCheckInside(!checkInside)//ปิด เปิด show error
-        console.log("123")
       } else {
         console.log("compare fileds is false")
         setStateChecktwocolumn("false")
@@ -534,7 +546,6 @@ const SelectFile = ({ logout }) => {
 
         <h1>count error = {employeeList_error_length}</h1>
         <h1>count item = {items.length}</h1>
-        <h1>result = {resultCheckLengthError}</h1>
         {/* <button onClick={checkTwoColumn}>compare to</button> */}
 
         {/* <button onClick={reset}>reset</button> */}
