@@ -20,6 +20,7 @@ const SelectFile = ({ logout }) => {
   const [resultCheckLengthError, setResultCheckLengthError] = useState("")
   const [isClick, setIsClick] = useState(false)
   const [codeState, setCodeState] = useState("")
+  const [checkTH_ID, setcheckTH_ID] = useState()
 
   useEffect(() => {
     Axios.get('http://localhost:3001/employee').then((response) => {
@@ -37,11 +38,11 @@ const SelectFile = ({ logout }) => {
   // }, [employeeList_error_length])
 
 
-  const checkTempError = async (booleanCom) => {
+  const checkTempError = async (booleanCom,value) => {
     await Axios.get('http://localhost:3001/employee_temp_check_country').then((response) => {
       setEmployeeList_error(response.data);
       setEmployeeList_error_length(response.data.length)
-      check_length_error(response.data.length, booleanCom)
+      check_length_error(response.data.length, booleanCom, value)
 
     })
     // console.log(listColumn,"list column")
@@ -68,12 +69,11 @@ const SelectFile = ({ logout }) => {
 
   ///////////////////////////////////////////////////////////////
 
-  const check_length_error = (length, booleanCom) => {
+  const check_length_error = (length, booleanCom,value) => {
+    const myBool = (value.toLowerCase() === 'true');
     try {
-      if ((length === 0) && (JSON.stringify(Object.keys(items[0])) == JSON.stringify(Object.keys(employeeList[0])))) {
-        console.log("into check obj")
+      if ((length === 0) && (JSON.stringify(Object.keys(items[0])) == JSON.stringify(Object.keys(employeeList[0]))) && myBool) {
         if (booleanCom) {
-          console.log("into update employee")
           for (let index = 0; index < items.length; index++) {
             updateEmployee(
               items[index].companygroup,
@@ -114,7 +114,7 @@ const SelectFile = ({ logout }) => {
           console.log("company code and group code is not macth")
         }
       } else {
-        setMessageUpdateFalse("don't update employee")
+        // setMessageUpdateFalse("don't update employee")
         setResultCheckLengthError("false")
         console.log("update employee not success!!")
       }
@@ -257,29 +257,65 @@ const SelectFile = ({ logout }) => {
       vip: newvip,
       ConsentDM: newConsentDM,
     }).then((response) => {
-      checkCompositeCode(newcompanygroup, newcompanyname)
+      const booleanID_NO = checkID_NO()
+      booleanID_NO.then(value =>{
+        checkCompositeCode(newcompanygroup, newcompanyname,value)
+      })
+      
+      
+
     })
   }
   // useEffect(() => {
   //   checkCompositeCode()
   // }, [codeState])
 
-  const checkCompositeCode = async (newcompanygroup, newcompanyname) => {
+  const checkCompositeCode = async (newcompanygroup, newcompanyname,value) => {
     await Axios.post("http://localhost:3001/check_composite_code", {
       GroupCode: newcompanygroup,
       CompanyCode: newcompanyname,
     }).then((response) => {
       if (items.length != 0) {
         if (response.data.message) {
-          checkTempError(false)
+          checkTempError(false,value)
           console.log("CompositeCode message false")
         } else {
-          checkTempError(true)
+          checkTempError(true,value)
           console.log("CompositeCode message true")
         }
       }
     })
+  }
+  const checkID_NO = async () => {
+    return new Promise((resolve, reject) => {
+      Object.keys(items).forEach(function (count) { //key == 0,1
+        if (items[count]["Nation"] === "TH") {
+          if (String(items[count]["identification"]).length === 13) {
+            const totleCheckSumDigit = (checkSumDigitIDNO(String(items[count]["identification"])))
+            const lastDigitlist = String(items[count]["identification"]).split("")
+            const lastIndecDigit = lastDigitlist[lastDigitlist.length - 1]
+            if (String(totleCheckSumDigit) === String(lastIndecDigit)) {
+              resolve('true')
+            } else {
+              console.log("it not identify Thailand")
+              resolve('false')
+            }
+          } else {
+            console.log("length identify must have 13 digit")
+            resolve('false')
 
+          }
+        } else {
+          console.log("nation is not TH")
+          resolve('true')
+        }
+      });
+    })
+  }
+  const checkSumDigitIDNO = (number) => {
+    const calculate = (parseInt(number[0]) * 13) + (parseInt(number[1]) * 12) + (parseInt(number[2]) * 11) + (parseInt(number[3]) * 10) + (parseInt(number[4]) * 9) + (parseInt(number[5]) * 8) + (parseInt(number[6]) * 7) + (parseInt(number[7]) * 6) + (parseInt(number[8]) * 5) + (parseInt(number[9]) * 4) + (parseInt(number[10]) * 3) + (parseInt(number[11]) * 2)
+    const findMod = (11 - (calculate % 11)) % 10
+    return findMod
   }
 
   //เขียนข้อมูลในitemลงdatabase temp
