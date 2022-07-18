@@ -21,7 +21,9 @@ const SelectFile = ({ logout }) => {
   const [isClick, setIsClick] = useState(false)
   const [codeState, setCodeState] = useState("")
   const [checkTH_ID, setcheckTH_ID] = useState()
-
+  var c = []
+  var dictID = []
+  var dictCom = []
   useEffect(() => {
     Axios.get('http://localhost:3001/employee').then((response) => {
       setEmployeeList(response.data);
@@ -38,7 +40,7 @@ const SelectFile = ({ logout }) => {
   // }, [employeeList_error_length])
 
 
-  const checkTempError = async (booleanCom,value) => {
+  const checkTempError = async (booleanCom, value) => {
     await Axios.get('http://localhost:3001/employee_temp_check_country').then((response) => {
       setEmployeeList_error(response.data);
       setEmployeeList_error_length(response.data.length)
@@ -69,10 +71,10 @@ const SelectFile = ({ logout }) => {
 
   ///////////////////////////////////////////////////////////////
 
-  const check_length_error = (length, booleanCom,value) => {
-    const myBool = (value.toLowerCase() === 'true');
+  const check_length_error = (length, booleanCom, value) => {
+    // const myBool = (value.toLowerCase() === 'true');
     try {
-      if ((length === 0) && (JSON.stringify(Object.keys(items[0])) == JSON.stringify(Object.keys(employeeList[0]))) && myBool) {
+      if ((length === 0) && (JSON.stringify(Object.keys(items[0])) == JSON.stringify(Object.keys(employeeList[0])))) {
         if (booleanCom) {
           for (let index = 0; index < items.length; index++) {
             updateEmployee(
@@ -111,7 +113,7 @@ const SelectFile = ({ logout }) => {
           console.log("update employee success!!")
           setResultCheckLengthError("true")
         } else {
-          console.log("company code and group code is not macth")
+          console.log("company code and group code is not macth or identify is not true")
         }
       } else {
         // setMessageUpdateFalse("don't update employee")
@@ -257,59 +259,120 @@ const SelectFile = ({ logout }) => {
       vip: newvip,
       ConsentDM: newConsentDM,
     }).then((response) => {
-      const booleanID_NO = checkID_NO()
-      booleanID_NO.then(value =>{
-        checkCompositeCode(newcompanygroup, newcompanyname,value)
-      })
-      
-      
+      var listid = []
+      var listcom = []
+      const booleanID_NO = checkID_NO(newidentification, newNation, newempid)
+      booleanID_NO.then(value => {
+        dictID.push({
+          key: newempid,
+          value: value
+        })
+        //console.log(dictID, "dictID")
+        const booleancomposite = checkCompositeCode(newcompanygroup, newcompanyname)
+        booleancomposite.then(value => {
+          dictCom.push({
+            key: newempid,
+            value: value
+          })
+          //console.log(dictCom, "diccom")
+          if (dictID.length === items.length && dictCom.length === items.length) {
+            var v1 = ""
+            var totleID = [] //[ 'true', 'false', 'false' ]
+            for (let index = 0; index < dictID.length; index++) {
+              v1 = Object.values(dictID[index])
+              totleID.push(v1[1])
+            }
 
+            var v2 = ""
+            var totleCOM = [] //[ 'true', 'false', 'false' ]
+            for (let index = 0; index < dictCom.length; index++) {
+              v2 = Object.values(dictCom[index])
+              totleCOM.push(v2[1])
+            }
+            console.log("123")
+            console.log(totleID)
+            console.log(totleCOM)
+            if (!totleID.includes("false") && !totleCOM.includes("false") ) { //กรณีที่ identify and composite ถูกต้องทั้งหมด
+              console.log("poi")
+              checkTempError(true, value)
+            }
+            else{
+              checkTempError(false, value)
+            }
+          }
+        })
+
+        // checkCompositeCode(newcompanygroup, newcompanyname, value)     
+      })
+
+      // console.log(dictID, "dictID")
+      // console.log(dictCom, "diccom")
+      // var i = false
+      // if (dictID.length === items.length) {
+      //   i = true
+      // }
+      // var c = false
+      // if (dictCom.length === items.length) {
+      //   c = true
+      // }
+
+      // if (i && c) {
+      //   console.log("zxcasd")
+      //   console.log(dictID.length, "dictID")
+      //   console.log(dictCom.length, "diccom")
+      // }
     })
+
   }
   // useEffect(() => {
   //   checkCompositeCode()
   // }, [codeState])
 
-  const checkCompositeCode = async (newcompanygroup, newcompanyname,value) => {
-    await Axios.post("http://localhost:3001/check_composite_code", {
-      GroupCode: newcompanygroup,
-      CompanyCode: newcompanyname,
-    }).then((response) => {
-      if (items.length != 0) {
-        if (response.data.message) {
-          checkTempError(false,value)
-          console.log("CompositeCode message false")
-        } else {
-          checkTempError(true,value)
-          console.log("CompositeCode message true")
-        }
-      }
-    })
-  }
-  const checkID_NO = async () => {
+  const checkCompositeCode = async (newcompanygroup, newcompanyname) => {
     return new Promise((resolve, reject) => {
-      Object.keys(items).forEach(function (count) { //key == 0,1
-        if (items[count]["Nation"] === "TH") {
-          if (String(items[count]["identification"]).length === 13) {
-            const totleCheckSumDigit = (checkSumDigitIDNO(String(items[count]["identification"])))
-            const lastDigitlist = String(items[count]["identification"]).split("")
-            const lastIndecDigit = lastDigitlist[lastDigitlist.length - 1]
-            if (String(totleCheckSumDigit) === String(lastIndecDigit)) {
-              resolve('true')
-            } else {
-              console.log("it not identify Thailand")
-              resolve('false')
-            }
+      Axios.post("http://localhost:3001/check_composite_code", {
+        GroupCode: newcompanygroup,
+        CompanyCode: newcompanyname,
+      }).then((response) => {
+        if (items.length != 0) {
+          if (response.data.message) {
+            // checkTempError(false, value)
+            //console.log("CompositeCode message false")
+            resolve("false")
           } else {
-            console.log("length identify must have 13 digit")
-            resolve('false')
+            // checkTempError(true, value)
+            //console.log("CompositeCode message true")
+            resolve("true")
+          }
+        }else{
+          resolve("true")
+        }
+      })
+    });
 
+  }
+  const checkID_NO = async (identify, nation, newempid) => {
+    return new Promise((resolve, reject) => {
+      if (nation === "TH") {
+        if (String(identify).length === 13) {
+          const totleCheckSumDigit = (checkSumDigitIDNO(String(identify)))
+          const lastDigitlist = String(identify).split("")
+          const lastIndecDigit = lastDigitlist[lastDigitlist.length - 1]
+          if (String(totleCheckSumDigit) === String(lastIndecDigit)) {
+            resolve('true')
+          } else {
+            //console.log("it not identify Thailand id", newempid)
+            resolve('false')
           }
         } else {
-          console.log("nation is not TH")
-          resolve('true')
+          //console.log("length identify must have 13 digit id", newempid)
+          resolve('false')
+
         }
-      });
+      } else {
+        //console.log("nation is not TH id", newempid)
+        resolve('true')
+      }
     })
   }
   const checkSumDigitIDNO = (number) => {
@@ -434,49 +497,8 @@ const SelectFile = ({ logout }) => {
       }
     } catch (error) {
     }
-
-
-    // delEmployee()
-    // check_length_error()
-    // setCount(0)
-
   }
 
-  // async function updateDatabaseMain(event) {
-  //   event.preventDefault();
-  //   delEmployee()
-  //   check_length_error()
-  //   setCount(0)
-  //   setCheckInside(!checkInside)
-  // }
-  // async function checktwocolumn(event) {
-  //   event.preventDefault();
-  //   try {
-  //     if (JSON.stringify(Object.keys(items[0])) == JSON.stringify(Object.keys(employeeList[0]))) {
-  //       console.log("compare fileds is true")
-  //       console.log(Object.keys(items[0]))
-  //       console.log(Object.keys(employeeList[0]))
-  //       setStateChecktwocolumn("true")
-  //       delEmployee()// clean data in temp and query data in temp database
-  //       // check_length_error()
-  //       setCount(0)
-  //       setCheckInside(!checkInside)//ปิด เปิด show error
-  //       updateData()
-  //     } else {
-  //       console.log("compare fileds is false")
-  //       setStateChecktwocolumn("false")
-  //       console.log(Object.keys(items[0]))
-  //       console.log(Object.keys(employeeList[0]))
-  //     }
-  //   } catch (error) {
-  //   }
-
-  // }
-
-  const updateData = () => {
-    check_length_error()
-
-  }
 
   return (
     <div className="App container">
