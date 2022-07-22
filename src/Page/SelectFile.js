@@ -10,7 +10,6 @@ const SelectFile = ({ logout }) => {
   const [employeeList_error, setEmployeeList_error] = useState([]);
   const [employeeList_error_length, setEmployeeList_error_length] = useState(null);
   const [file, setFile] = useState(null);
-  const [count, setCount] = useState(0);
   // รายชื่อพนักงานทั้งหมดที่อยู่ในdatabaseจริง
   const [listErrorFull, setListErrorFull] = useState([])
   const [show, setShow] = useState(false)
@@ -20,10 +19,14 @@ const SelectFile = ({ logout }) => {
   const [resultCheckLengthError, setResultCheckLengthError] = useState("")
   const [isClick, setIsClick] = useState(false)
   const [codeState, setCodeState] = useState("")
-  const [checkTH_ID, setcheckTH_ID] = useState()
+  const [listIDNotTH1RecordNotFalse, setListIDNotTH1RecordNotFalse] = useState([])
+  const [listIDNotTH1RecordFalse, setListIDNotTH1RecordFalse] = useState([])
+  const [aCom, setACom] = useState([])
   var c = []
   var dictID = []
   var dictCom = []
+  var AdictID = []
+  // var listIDNotTH1RecordFalse = []
   useEffect(() => {
     Axios.get('http://localhost:3001/employee').then((response) => {
       setEmployeeList(response.data);
@@ -40,11 +43,15 @@ const SelectFile = ({ logout }) => {
   // }, [employeeList_error_length])
 
 
-  const checkTempError = async (booleanCom, value) => {
+  const checkTempError = async () => {//pass
     await Axios.get('http://localhost:3001/employee_temp_check_country').then((response) => {
       setEmployeeList_error(response.data);
       setEmployeeList_error_length(response.data.length)
-      check_length_error(response.data.length, booleanCom, value)
+      // console.log(employeeList_error, "qwe")
+      errListRecordFalse(response.data)
+      errListRecordNotFalse(response.data)
+      
+      check_length_error(employeeList_error)
 
     })
     // console.log(listColumn,"list column")
@@ -59,7 +66,7 @@ const SelectFile = ({ logout }) => {
   }, [items])
 
 
-  const delEmployee = async () => {
+  const delEmployee = async () => {//pass
 
     await Axios.delete('http://localhost:3001/delete').then(() => {
       loopItem_employee_temp()
@@ -70,67 +77,66 @@ const SelectFile = ({ logout }) => {
   }
 
   ///////////////////////////////////////////////////////////////
+  useEffect(() => {
+    check_length_error()
+  }, [resultCheckLengthError])
 
-  const check_length_error = (length, booleanCom, value) => {
-    // const myBool = (value.toLowerCase() === 'true');
+  const check_length_error = () => {//pass
+    // console.log(employeeList_error, "poi1")
     try {
-      if ((length === 0) && (JSON.stringify(Object.keys(items[0])) == JSON.stringify(Object.keys(employeeList[0])))) {
-        if (booleanCom) {
-          for (let index = 0; index < items.length; index++) {
-            updateEmployee(
-              items[index].companygroup,
-              items[index].companyname,
-              items[index].empid,
-              items[index].identification,
-              items[index].b_dd,
-              items[index].b_mm,
-              items[index].b_yyyy,
-              items[index].salutation_thai,
-              items[index].thai_firstname,
-              items[index].thai_lastname,
-              items[index].Thai_Fullname,
-              items[index].salutation_eng,
-              items[index].eng_firstname,
-              items[index].eng_lastname,
-              items[index].position,
-              items[index].email,
-              items[index].positioncode,
-              items[index].phone_No,
-              items[index].province,
-              items[index].worksite,
-              items[index].employment_Type,
-              items[index].worktype,
-              items[index].Report,
-              items[index].SalLessThan15k,
-              items[index].joindate,
-              items[index].business_SIM,
-              items[index].Nation,
-              items[index].vip,
-              items[index].ConsentDM,
-            )
+      if ((employeeList_error.length === 0) && (JSON.stringify(Object.keys(items[0])) == JSON.stringify(Object.keys(employeeList[0])))) {
+        for (let index = 0; index < items.length; index++) {
+          updateEmployee(
+            items[index].companygroup,
+            items[index].companyname,
+            items[index].empid,
+            items[index].identification,
+            items[index].b_dd,
+            items[index].b_mm,
+            items[index].b_yyyy,
+            items[index].salutation_thai,
+            items[index].thai_firstname,
+            items[index].thai_lastname,
+            items[index].Thai_Fullname,
+            items[index].salutation_eng,
+            items[index].eng_firstname,
+            items[index].eng_lastname,
+            items[index].position,
+            items[index].email,
+            items[index].positioncode,
+            items[index].phone_No,
+            items[index].province,
+            items[index].worksite,
+            items[index].employment_Type,
+            items[index].worktype,
+            items[index].Report,
+            items[index].SalLessThan15k,
+            items[index].joindate,
+            items[index].business_SIM,
+            items[index].Nation,
+            items[index].vip,
+            items[index].ConsentDM,
+          )
 
-          }
-          console.log("update employee success!!")
-          setResultCheckLengthError("true")
-        } else {
-          console.log("company code and group code is not macth or identify is not true")
         }
+        console.log("update employee success!!")
+        setResultCheckLengthError("true")
+
       } else {
         // setMessageUpdateFalse("don't update employee")
         setResultCheckLengthError("false")
-        console.log("update employee not success!!")
+        console.log("update employee not success!!1")
       }
     } catch (error) {
 
     }
-    setCount(count + 1)
   }
 
   //เอาข้อมูลจากExcelเข้าdatabaseจริง
   useEffect(() => {
     updateEmployee()
   }, [])
-  const updateEmployee = async (
+  const updateEmployee = async (//pass
     newcompanygroup,
     newcompanyname,
     newempid,
@@ -198,7 +204,7 @@ const SelectFile = ({ logout }) => {
   // useEffect(() => {
   //   updateEmployee_temp()
   // }, [])
-  const updateEmployee_temp = async (
+  const updateEmployee_temp = async (//pass
     newcompanygroup,
     newcompanyname,
     newempid,
@@ -258,131 +264,68 @@ const SelectFile = ({ logout }) => {
       Nation: newNation,
       vip: newvip,
       ConsentDM: newConsentDM,
-    }).then((response) => {
-      var listid = []
-      var listcom = []
-      const booleanID_NO = checkID_NO(newidentification, newNation, newempid)
-      booleanID_NO.then(value => {
-        dictID.push({
-          key: newempid,
-          value: value
-        })
-        //console.log(dictID, "dictID")
-        const booleancomposite = checkCompositeCode(newcompanygroup, newcompanyname)
-        booleancomposite.then(value => {
-          dictCom.push({
-            key: newempid,
-            value: value
-          })
-          //console.log(dictCom, "diccom")
-          if (dictID.length === items.length && dictCom.length === items.length) {
-            var v1 = ""
-            var totleID = [] //[ 'true', 'false', 'false' ]
-            for (let index = 0; index < dictID.length; index++) {
-              v1 = Object.values(dictID[index])
-              totleID.push(v1[1])
-            }
-
-            var v2 = ""
-            var totleCOM = [] //[ 'true', 'false', 'false' ]
-            for (let index = 0; index < dictCom.length; index++) {
-              v2 = Object.values(dictCom[index])
-              totleCOM.push(v2[1])
-            }
-            console.log("123")
-            console.log(totleID)
-            console.log(totleCOM)
-            if (!totleID.includes("false") && !totleCOM.includes("false") ) { //กรณีที่ identify and composite ถูกต้องทั้งหมด
-              console.log("poi")
-              checkTempError(true, value)
-            }
-            else{
-              checkTempError(false, value)
-            }
-          }
-        })
-
-        // checkCompositeCode(newcompanygroup, newcompanyname, value)     
-      })
-
-      // console.log(dictID, "dictID")
-      // console.log(dictCom, "diccom")
-      // var i = false
-      // if (dictID.length === items.length) {
-      //   i = true
-      // }
-      // var c = false
-      // if (dictCom.length === items.length) {
-      //   c = true
-      // }
-
-      // if (i && c) {
-      //   console.log("zxcasd")
-      //   console.log(dictID.length, "dictID")
-      //   console.log(dictCom.length, "diccom")
-      // }
     })
-
+    checkTempError()
   }
   // useEffect(() => {
   //   checkCompositeCode()
   // }, [codeState])
 
-  const checkCompositeCode = async (newcompanygroup, newcompanyname) => {
-    return new Promise((resolve, reject) => {
-      Axios.post("http://localhost:3001/check_composite_code", {
-        GroupCode: newcompanygroup,
-        CompanyCode: newcompanyname,
-      }).then((response) => {
-        if (items.length != 0) {
-          if (response.data.message) {
-            // checkTempError(false, value)
-            //console.log("CompositeCode message false")
-            resolve("false")
-          } else {
-            // checkTempError(true, value)
-            //console.log("CompositeCode message true")
-            resolve("true")
-          }
-        }else{
-          resolve("true")
-        }
-      })
-    });
+  // const checkCompositeCode = async (newcompanygroup, newcompanyname) => {
+  //   return new Promise((resolve, reject) => {
+  //     Axios.post("http://localhost:3001/check_composite_code", {
+  //       GroupCode: newcompanygroup,
+  //       CompanyCode: newcompanyname,
+  //     }).then((response) => {
+  //       if (items.length != 0) {
+  //         if (response.data.message) {
+  //           // checkTempError(false, value)
+  //           //console.log("CompositeCode message false")
+  //           resolve("false")
+  //         } else {
+  //           // checkTempError(true, value)
+  //           //console.log("CompositeCode message true")
+  //           resolve("true")
+  //         }
+  //       } else {
+  //         resolve("true")
+  //       }
+  //     })
+  //   });
 
-  }
-  const checkID_NO = async (identify, nation, newempid) => {
-    return new Promise((resolve, reject) => {
-      if (nation === "TH") {
-        if (String(identify).length === 13) {
-          const totleCheckSumDigit = (checkSumDigitIDNO(String(identify)))
-          const lastDigitlist = String(identify).split("")
-          const lastIndecDigit = lastDigitlist[lastDigitlist.length - 1]
-          if (String(totleCheckSumDigit) === String(lastIndecDigit)) {
-            resolve('true')
-          } else {
-            //console.log("it not identify Thailand id", newempid)
-            resolve('false')
-          }
-        } else {
-          //console.log("length identify must have 13 digit id", newempid)
-          resolve('false')
+  // }
+  // const checkID_NO = async (identify, nation, newempid) => {
+  //   return new Promise((resolve, reject) => {
+  //     if (nation === "TH") {
+  //       if (String(identify).length === 13) {
+  //         const totleCheckSumDigit = (checkSumDigitIDNO(String(identify)))
+  //         const lastDigitlist = String(identify).split("")
+  //         const lastIndecDigit = lastDigitlist[lastDigitlist.length - 1]
+  //         if (String(totleCheckSumDigit) === String(lastIndecDigit)) {
+  //           resolve('true')
+  //         } else {
+  //           //console.log("it not identify Thailand id", newempid)
+  //           resolve('false')
+  //         }
+  //       } else {
+  //         //console.log("length identify must have 13 digit id", newempid)
+  //         resolve('false')
 
-        }
-      } else {
-        //console.log("nation is not TH id", newempid)
-        resolve('true')
-      }
-    })
-  }
-  const checkSumDigitIDNO = (number) => {
+  //       }
+  //     } else {
+  //       //console.log("nation is not TH id", newempid)
+  //       resolve('true')
+  //     }
+  //   })
+  // }
+  const checkSumDigitIDNO = (number, lastIndex) => {
     const calculate = (parseInt(number[0]) * 13) + (parseInt(number[1]) * 12) + (parseInt(number[2]) * 11) + (parseInt(number[3]) * 10) + (parseInt(number[4]) * 9) + (parseInt(number[5]) * 8) + (parseInt(number[6]) * 7) + (parseInt(number[7]) * 6) + (parseInt(number[8]) * 5) + (parseInt(number[9]) * 4) + (parseInt(number[10]) * 3) + (parseInt(number[11]) * 2)
     const findMod = (11 - (calculate % 11)) % 10
-    return findMod
+    return String(findMod) === String(lastIndex)
   }
 
   //เขียนข้อมูลในitemลงdatabase temp
-  const loopItem_employee_temp = async () => {
+  const loopItem_employee_temp = async () => {//pass
     for (let index = 0; index < items.length; index++) {
       updateEmployee_temp(
         items[index].companygroup,
@@ -424,7 +367,7 @@ const SelectFile = ({ logout }) => {
    * @param {file} file 
    * @description //functionอ่านข้อมูลจากexcel 
    */
-  const readExcel = (file) => {
+  const readExcel = (file) => {//pass
     return new Promise((resolve, reject) => {
 
       const fileReader = new FileReader();
@@ -450,7 +393,42 @@ const SelectFile = ({ logout }) => {
 
   }
   const get_error = async (e) => {
-    errList();
+    var list_null = []
+
+    console.log(listIDNotTH1RecordFalse,"record false in err")
+    console.log(listIDNotTH1RecordNotFalse,"record not false in err")
+    Object.keys(employeeList_error).forEach(function (count) { //key == 0,1,... ถ้าเช็คแล้วมีerror
+      Object.keys(employeeList_error[count]).forEach(function (key) { //key == 0,1
+        if (Object.values(employeeList_error[count]).includes(null)) {
+          if (employeeList_error[count][key] == null) {
+            list_null.push(key)
+          }else{
+            for (let i = 0; i < listIDNotTH1RecordFalse.length; i++) {
+              if (Object.values(employeeList_error[count]["empid"]).includes(listIDNotTH1RecordFalse[i]) && !(list_null.includes("identify"))) {
+                list_null.push("identify")
+              }
+              
+            }
+          }
+
+        } else {
+          if (!(list_null.includes("identify"))) {
+            list_null.push("identify")
+            // console.log(employeeList_error[count], "else")
+          }
+
+        }
+      })
+      if (list_null.length != 0) {
+        listErrorFull.push([employeeList_error[count], list_null])
+        list_null = []
+      }
+      // console.log(Object.values(employeeList_error[3]["empid"]))
+      //   console.log(Object.values(employeeList_error[3]["empid"]).includes(listIDNotTH1RecordFalse[0]))
+
+      list_null = []
+    });
+    // errList2(employeeList_error);
     setShow(!show)
     if (show === true) {
       setListErrorFull([])
@@ -458,21 +436,114 @@ const SelectFile = ({ logout }) => {
     // console.log(listErrorFull)
   }
 
-  const errList = () => {
-    Object.keys(employeeList_error).forEach(function (count) { //key == 0,1
-      var list_null = []
-      Object.keys(employeeList_error[count]).forEach(function (key) { //key == 0,1
-        if (employeeList_error[count][key] == null) {
-          list_null.push(key)
-        }
-      })
+  const errListRecordNotFalse = (employeeList_error) => {//หาlistที่ถูกแล้วcheck identify
+    var props = ["companygroup", "companyname", "empid", "identification", "b_dd", "b_mm", "b_yyyy", "salutation_thai", "thai_firstname",
+      "thai_lastname", "Thai_Fullname", "salutation_eng", "eng_firstname", "eng_lastname", "position", "email", "positioncode", "phone_No",
+      "province", "worksite", "employment_Type", "worktype", "Report", "SalLessThan15k", "joindate", "business_SIM", "Nation", "vip", "ConsentDM"
+    ];
 
-      if (list_null.length != 0) {
-        listErrorFull.push([employeeList_error[count], list_null])
-        list_null = []
-      }
+    var results = items.filter(function (o1) {
+      // filter out (!) items in result2
+      return !employeeList_error.some(function (o2) {
+        return o1.empid === o2.empid;          // assumes unique id
+      });
+    }).map(function (o) {
+      // use reduce to make objects with only the required properties
+      // and map to apply this to the filtered array as a whole
+      return props.reduce(function (newo, empid) {
+        newo[empid] = o[empid];
+        return newo;
+      }, {});
     });
+    const resultIdentify = results.filter(result => !(checkSumDigitIDNO(result.identification.toString(), String(result.identification)[String(result.identification).length - 1])))
+    // console.log(resultIdentify, "result state")//list ที่ไม่เป็นerror แต่identifyผิด
+    const b = []
+    for (let i = 0; i < resultIdentify.length; i++) {
+      // console.log(String(resultIdentify[i]["empid"]), "result state")
+      //setListIDNotTH1RecordNotFalse([...listIDNotTH1RecordFalse, ([...resultIdentify[i]["empid"]])])
+      b.push(resultIdentify[i]["empid"])//id ของlist ที่ไม่เป็นerror แต่identifyผิด
+    }
+
+    setListIDNotTH1RecordNotFalse([...listIDNotTH1RecordNotFalse, ...b])
+    setEmployeeList_error([...employeeList_error, ...resultIdentify])
+
   }
+
+  const errListRecordFalse = (employeeList_error) => {//หาlistที่ถูกแล้วcheck identify
+    console.log(employeeList_error,"987")
+    const resultIdentify = employeeList_error.filter(emerr => !(checkSumDigitIDNO(emerr.identification.toString(), String(emerr.identification)[String(emerr.identification).length - 1])))
+    const b = []// empidที่ผิดแล้วอยู่ในlist err
+    for (let i = 0; i < resultIdentify.length; i++) {
+      // console.log(String(resultIdentify[i]["empid"]), "result state")
+      //setListIDNotTH1RecordNotFalse([...listIDNotTH1RecordFalse, ([...resultIdentify[i]["empid"]])])
+      b.push(resultIdentify[i]["empid"])//id ของlist ที่ไม่เป็นerror แต่identifyผิด
+    }
+    setListIDNotTH1RecordFalse([...listIDNotTH1RecordFalse, ...b])
+
+  }
+  // const errList2 = (employeeList_error) => {
+  //   console.log(employeeList_error)
+  //   var list_null = []
+  //   Object.keys(employeeList_error).forEach(function (count) { //key == 0,1,... ถ้าเช็คแล้วมีerror
+  //     Object.keys(employeeList_error[count]).forEach(function (key) { //key == 0,1
+  //       if (employeeList_error[count][key] == null || employeeList_error[count][key] == " ") {
+  //         list_null.push(key)
+  //       }
+  //     })
+  //     // console.log(id_KV[1],": id_KV[1]") // true false of id
+  //     // console.log(k1,"k1") // key of temp
+  //     // console.log(id_KV[0],": id_KV[0]") // key od id
+  //     // if (id_KV[1] === "false" && k1 === id_KV[0]) {
+  //     //   list_null.push("identify")
+  //     // }
+  //     // if (com_KV[1] === "false"&& k1 === com_KV[0]) {
+  //     //   list_null.push("group and name is not match")
+  //     // }
+
+  //     // for (let i = 0; i < aID.length; i++) {
+  //     //   for (let j = 0; j < aCom.length; j++) {
+  //     //     const keyOfID = aID[i].key
+  //     //     const valueOfID = aID[i].value
+  //     //     // console.log(keyOfID, "id")
+  //     //     // console.log(valueOfID, "id")
+
+  //     //     const keyOfCom = aCom[j].key
+  //     //     const valueOfCom = aCom[j].value
+  //     //     // console.log(keyOfCom, "com")
+  //     //     // console.log(valueOfCom, "com")
+  //     //     if (keyOfID === keyOfCom && (valueOfID === "false")) {
+  //     //       if (k1 === keyOfID) {
+  //     //         console.log(keyOfID, "id")
+  //     //         console.log("identify error")
+  //     //         list_null.push("identify")
+  //     //       } else {
+
+  //     //       }
+  //     //     }
+  //     //     if (keyOfID === keyOfCom && (valueOfCom === "false")) {
+  //     //       if (k1 === keyOfCom) {
+  //     //         console.log(keyOfCom, "com")
+  //     //         console.log("composite error")
+  //     //         list_null.push("composite")
+  //     //       }
+  //     //     }
+  //     //   }
+  //     // }
+  //     // for (let i = 0; i < aCom.length; i++) {
+  //     //   const keyOfCom = aCom[i].key
+  //     //   const valueOfCom = aCom[i].value
+  //     //   console.log(keyOfCom, "com")
+  //     //   console.log(valueOfCom, "com")
+  //     // }
+
+
+  //     if (list_null.length != 0) {
+  //       listErrorFull.push([employeeList_error[count], list_null])
+  //       list_null = []
+  //     }
+  //   });
+  // }
+
 
   //วางไฟล์excel ->ข้อมูลจะเข้าconst items
   async function handleSubmit(event) {
@@ -489,7 +560,6 @@ const SelectFile = ({ logout }) => {
         setStateChecktwocolumn("true")
         delEmployee()// clean data in temp and query data in temp database
         // check_length_error()
-        setCount(0)
         setCheckInside(!checkInside)//ปิด เปิด show error
       } else {
         console.log("compare fileds is false")
@@ -518,12 +588,6 @@ const SelectFile = ({ logout }) => {
           upload file
         </Button>
       </Form>
-      {/* 
-      <Form onSubmit={checktwocolumn}>
-        <Button block="true" size="lg" type="submit">
-          compare fileds
-        </Button>
-      </Form> */}
 
       <div>
         {stateChecktwocolumn === "true" ?
@@ -540,10 +604,8 @@ const SelectFile = ({ logout }) => {
                         <button onClick={(e) => get_error(e)}>Show Error</button>
                       </div>
                       :
-                      <div><h1>company code and group code is not macth</h1></div>
+                      <div></div>
                     }
-                    {/* <h1>record error</h1>
-                    <button onClick={(e) => get_error(e)}>Show Error</button> */}
                   </div>
                 }
               </div>
@@ -562,33 +624,6 @@ const SelectFile = ({ logout }) => {
           </div>
 
         }
-
-
-        {/* {resultCheckLengthError === "true" ?
-          <div>
-            <h1>success update</h1>
-          </div>
-
-          :
-          <div>
-            {resultCheckLengthError === "false" ?
-              <div>
-                <h1>record error</h1>
-                <button onClick={(e) => get_error(e)}>Show Error</button>
-              </div>
-              :
-              <div>
-
-              </div>
-            }
-          </div>
-
-        } */}
-
-
-
-
-
 
         {show ?
           <div>
@@ -610,7 +645,7 @@ const SelectFile = ({ logout }) => {
 
 
 
-        <h1>count error = {employeeList_error_length}</h1>
+        <h1>count error = {employeeList_error.length}</h1>
         <h1>count item = {items.length}</h1>
         {/* <button onClick={checkTwoColumn}>compare to</button> */}
 
