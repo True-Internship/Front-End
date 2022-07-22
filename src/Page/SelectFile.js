@@ -21,7 +21,7 @@ const SelectFile = ({ logout }) => {
   const [codeState, setCodeState] = useState("")
   const [listIDNotTH1RecordNotFalse, setListIDNotTH1RecordNotFalse] = useState([])
   const [listIDNotTH1RecordFalse, setListIDNotTH1RecordFalse] = useState([])
-  const [aCom, setACom] = useState([])
+  const [click, setclick] = useState(false)
   var c = []
   var dictID = []
   var dictCom = []
@@ -45,15 +45,21 @@ const SelectFile = ({ logout }) => {
 
   const checkTempError = async () => {//pass
     await Axios.get('http://localhost:3001/employee_temp_check_country').then((response) => {
-      setEmployeeList_error(response.data);
-      setEmployeeList_error_length(response.data.length)
-      // console.log(employeeList_error, "qwe")
-      errListRecordFalse(response.data)
-      errListRecordNotFalse(response.data)
-      
-      check_length_error(employeeList_error)
+      setEmployeeList_error(response.data);    
+      console.log(response.data, "qwe")
+      if (response.data.length !=0) {
+          errListRecordFalse(response.data)
+          errListRecordNotFalse(response.data) 
+      }else{
+          errListRecordNotFalse(response.data)  
+      }
 
+  
+      check_length_error(response.data)
+      setEmployeeList_error_length(response.data.length)
+      
     })
+    
     // console.log(listColumn,"list column")
     // console.log(Object.keys(employeeList[0]),"list column database")
     // try {
@@ -78,13 +84,14 @@ const SelectFile = ({ logout }) => {
 
   ///////////////////////////////////////////////////////////////
   useEffect(() => {
-    check_length_error()
+    check_length_error(employeeList_error)
   }, [resultCheckLengthError])
 
-  const check_length_error = () => {//pass
-    // console.log(employeeList_error, "poi1")
+  const check_length_error = (employeeList_error) => {//pass
+    console.log(employeeList_error, "err")
+    console.log(click, "state check")
     try {
-      if ((employeeList_error.length === 0) && (JSON.stringify(Object.keys(items[0])) == JSON.stringify(Object.keys(employeeList[0])))) {
+      if ((employeeList_error.length === 0) && (JSON.stringify(Object.keys(items[0])) == JSON.stringify(Object.keys(employeeList[0]))) && click) {
         for (let index = 0; index < items.length; index++) {
           updateEmployee(
             items[index].companygroup,
@@ -133,9 +140,9 @@ const SelectFile = ({ logout }) => {
   }
 
   //เอาข้อมูลจากExcelเข้าdatabaseจริง
-  useEffect(() => {
-    updateEmployee()
-  }, [])
+  // useEffect(() => {
+  //   updateEmployee()
+  // }, [])
   const updateEmployee = async (//pass
     newcompanygroup,
     newcompanyname,
@@ -264,8 +271,10 @@ const SelectFile = ({ logout }) => {
       Nation: newNation,
       vip: newvip,
       ConsentDM: newConsentDM,
+    }).then(()=>{
+      checkTempError()
     })
-    checkTempError()
+    
   }
   // useEffect(() => {
   //   checkCompositeCode()
@@ -318,10 +327,17 @@ const SelectFile = ({ logout }) => {
   //     }
   //   })
   // }
-  const checkSumDigitIDNO = (number, lastIndex) => {
+  const checkSumDigitIDNO = (number, lastIndex,Nation) => {
     const calculate = (parseInt(number[0]) * 13) + (parseInt(number[1]) * 12) + (parseInt(number[2]) * 11) + (parseInt(number[3]) * 10) + (parseInt(number[4]) * 9) + (parseInt(number[5]) * 8) + (parseInt(number[6]) * 7) + (parseInt(number[7]) * 6) + (parseInt(number[8]) * 5) + (parseInt(number[9]) * 4) + (parseInt(number[10]) * 3) + (parseInt(number[11]) * 2)
     const findMod = (11 - (calculate % 11)) % 10
-    return String(findMod) === String(lastIndex)
+    console.log(number,"123")
+    console.log(lastIndex,"456")
+    console.log(Nation,"654")
+    if (Nation === "TH") {
+      return (String(findMod) === String(lastIndex))
+    }else{
+      return true
+    }
   }
 
   //เขียนข้อมูลในitemลงdatabase temp
@@ -394,9 +410,9 @@ const SelectFile = ({ logout }) => {
   }
   const get_error = async (e) => {
     var list_null = []
-
-    console.log(listIDNotTH1RecordFalse,"record false in err")
-    console.log(listIDNotTH1RecordNotFalse,"record not false in err")
+    console.log(employeeList_error)
+    // console.log(listIDNotTH1RecordFalse,"record false in err")
+    // console.log(listIDNotTH1RecordNotFalse,"record not false in err")
     Object.keys(employeeList_error).forEach(function (count) { //key == 0,1,... ถ้าเช็คแล้วมีerror
       Object.keys(employeeList_error[count]).forEach(function (key) { //key == 0,1
         if (Object.values(employeeList_error[count]).includes(null)) {
@@ -406,8 +422,7 @@ const SelectFile = ({ logout }) => {
             for (let i = 0; i < listIDNotTH1RecordFalse.length; i++) {
               if (Object.values(employeeList_error[count]["empid"]).includes(listIDNotTH1RecordFalse[i]) && !(list_null.includes("identify"))) {
                 list_null.push("identify")
-              }
-              
+              }              
             }
           }
 
@@ -442,7 +457,7 @@ const SelectFile = ({ logout }) => {
       "province", "worksite", "employment_Type", "worktype", "Report", "SalLessThan15k", "joindate", "business_SIM", "Nation", "vip", "ConsentDM"
     ];
 
-    var results = items.filter(function (o1) {
+    var results = items.filter(function (o1) {//ตัวที่ถูก
       // filter out (!) items in result2
       return !employeeList_error.some(function (o2) {
         return o1.empid === o2.empid;          // assumes unique id
@@ -455,13 +470,18 @@ const SelectFile = ({ logout }) => {
         return newo;
       }, {});
     });
-    const resultIdentify = results.filter(result => !(checkSumDigitIDNO(result.identification.toString(), String(result.identification)[String(result.identification).length - 1])))
-    // console.log(resultIdentify, "result state")//list ที่ไม่เป็นerror แต่identifyผิด
+    console.log(results,'resultv11')
+    const resultIdentify = results.filter(result => !(checkSumDigitIDNO(result.identification.toString(), String(result.identification)[String(result.identification).length - 1],result.Nation)))
+    console.log(resultIdentify, "result stateV3")//list ที่ไม่เป็นerror แต่identifyผิด
     const b = []
     for (let i = 0; i < resultIdentify.length; i++) {
       // console.log(String(resultIdentify[i]["empid"]), "result state")
       //setListIDNotTH1RecordNotFalse([...listIDNotTH1RecordFalse, ([...resultIdentify[i]["empid"]])])
-      b.push(resultIdentify[i]["empid"])//id ของlist ที่ไม่เป็นerror แต่identifyผิด
+      console.log(String(resultIdentify[i]["identification"]).length ,"nation")
+      if (!(resultIdentify[i]["Nation"] === "TH")) {
+        b.push(resultIdentify[i]["empid"])//id ของlist ที่ไม่เป็นerror แต่identifyผิด
+      }
+      
     }
 
     setListIDNotTH1RecordNotFalse([...listIDNotTH1RecordNotFalse, ...b])
@@ -469,9 +489,9 @@ const SelectFile = ({ logout }) => {
 
   }
 
-  const errListRecordFalse = (employeeList_error) => {//หาlistที่ถูกแล้วcheck identify
-    console.log(employeeList_error,"987")
-    const resultIdentify = employeeList_error.filter(emerr => !(checkSumDigitIDNO(emerr.identification.toString(), String(emerr.identification)[String(emerr.identification).length - 1])))
+  const errListRecordFalse = (employeeList_error) => {//หาlistที่errorแล้วcheck identify
+    // console.log(employeeList_error,"987")
+    const resultIdentify = employeeList_error.filter(emerr => !(checkSumDigitIDNO(emerr.identification.toString(), String(emerr.identification)[String(emerr.identification).length - 1],emerr.Nation)))
     const b = []// empidที่ผิดแล้วอยู่ในlist err
     for (let i = 0; i < resultIdentify.length; i++) {
       // console.log(String(resultIdentify[i]["empid"]), "result state")
@@ -553,6 +573,7 @@ const SelectFile = ({ logout }) => {
     const valueexcel = await readExcel(file)
     setitems(valueexcel)
     console.log("read file excel")
+    setclick(true)
     const checkCompare = JSON.stringify(Object.keys(valueexcel[0])) == JSON.stringify(Object.keys(employeeList[0]))
     try {
       if (checkCompare) {
